@@ -1,27 +1,21 @@
 import amqplib, { type ChannelModel, type Channel  } from 'amqplib';
 
-let connection: ChannelModel | null = null;
-  let pubChannel:   Channel | null = null;
+  export let connection: ChannelModel | null = null;
 
-const URL = process.env.BROKER_URL;
+const BROKER_URL = process.env.BROKER_URL;
 
-export async function connectRabbitMQ(): Promise<void> {
-    if (!URL) throw new Error("BROKER_URL não definido.");
+export async function connectRabbitMQ(): Promise<ChannelModel> {
+    if (!BROKER_URL) throw new Error("BROKER_URL não definido.");
+    
+    if(connection){
+        return connection;
+    }
 
     try {
         console.log("🔌 [RabbitMQ] Iniciando conexão...");
         
-        connection = await amqplib.connect(URL);
-        pubChannel = await connection.createChannel();
+        connection = await amqplib.connect(BROKER_URL);
 
-        
-        await Promise.all([
-               pubChannel.assertExchange('clientes', 'fanout', { durable: true }),
-               pubChannel.assertExchange('produtos', 'fanout', { durable: true }), 
-               pubChannel.assertExchange('recebimentos', 'fanout', { durable: true }) ,
-               pubChannel.assertExchange('pedidos', 'fanout', { durable: true }) 
-            
-        ])
         console.log("✅ [RabbitMQ] Conectado e Exchange configurada!");
 
         connection.on('error', (err) => {
@@ -31,30 +25,17 @@ export async function connectRabbitMQ(): Promise<void> {
         connection.on('close', () => {
             console.warn("⚠️ [RabbitMQ] Conexão fechada. Tentando reconectar em 5s...");
             connection = null;
-            pubChannel = null;
             setTimeout(connectRabbitMQ, 5000);  
         });
+        return connection;
 
     } catch (error) {
-        console.error("❌ [RabbitMQ] Falha ao conectar. Tentando novamente em 5s...");
-        setTimeout(connectRabbitMQ, 5000);
+        console.error("❌ [RabbitMQ] Falha ao conectar");
+        throw error;
     }
 }
-
-// Função exportada para publicar mensagens
-export async function publishExchangeMessage( exchange: string , routingKey: string, data: any): Promise<boolean> {
-    if (!pubChannel || !connection) {
-        console.warn("⚠️ [RabbitMQ] Sem conexão ativa. Mensagem não enviada.");
-        return false;
-    }
-    try {
-        const buffer = Buffer.from(JSON.stringify(data));
-        return pubChannel.publish(exchange, routingKey, buffer);
-    } catch (error) {
-        console.error("❌ [RabbitMQ] Erro ao tentar publicar:", error);
-        return false;
-    }
-}
-
  
-
+export async function createChannel(): Promise<Channel> {
+    const conn = await connectRabbitMQ();
+    return await conn.createChannel();
+}
