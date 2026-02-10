@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "node --env-file .env --watch --experimental-strip-types src/index.ts",
-    "start": "tsx --env-file .env --experimental-strip-types src/index.ts",
+    "start": "node --env-file .env --experimental-strip-types src/index.ts",
     "db:seed": "tsx --env-file .env --experimental-strip-types src/database/seed/seed.ts",
     "teste:consumer": "tsx --env-file .env --watch  --experimental-strip-types src/services/service-prod-setor.ts"
   },
