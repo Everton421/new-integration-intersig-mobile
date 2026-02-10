@@ -4,8 +4,9 @@ import { sqlTriggers } from "../structure/triggers.ts";
 
 async function seed( ) {
     for( const i of sqlTables){
+
         try{
-        const [rows ] = await dbConn.query(i)
+        const [rows ] = await dbConn.query(i as string)
         console.log(rows);
         }catch(e){
             console.log(e)

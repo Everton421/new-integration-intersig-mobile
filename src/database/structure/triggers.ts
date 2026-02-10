@@ -240,8 +240,29 @@ export const sqlTriggers = [
         BEGIN
             INSERT INTO ${databaseEventos}.eventos_recebimentos_sistema(tabela_origem, id_registro, tipo_evento, status)
             VALUES ('cad_orca', OLD.CODIGO, 'DELETE', 'PENDENTE');
-        END`
+        END`,
+        /// 
+
+        `
+        DROP TRIGGER IF EXISTS ${estoque}.trg_setores;
+        `,
+    //     SETORES  UPDATE
+    `CREATE TRIGGER ${estoque}.trg_setores
+        AFTER UPDATE ON ${estoque}.setores
+        FOR EACH ROW
+        BEGIN
+            
+                INSERT INTO ${databaseEventos}.eventos_setores_sistema(tabela_origem, id_registro, tipo_evento, status )
+                VALUES ('setores', NEW.CODIGO, 'UPDATE', 'PENDENTE' );
+           
+        END`,
+          
+
+
+
+
 
         
+
 
 ];
