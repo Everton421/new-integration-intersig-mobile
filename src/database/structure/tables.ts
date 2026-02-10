@@ -22,30 +22,16 @@ import dbConn, { EVENTOS } from "../../connection/database-connection.ts";
              criado_em  timestamp NULL DEFAULT current_timestamp(),
             PRIMARY KEY ( id )
             ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci; `,
-          //  
-          //  ` CREATE TABLE IF NOT EXISTS  ${databaseEventos}.produto_setor (
-          //       setor  int(10) unsigned NOT NULL DEFAULT 0,
-          //       produto  int(10) unsigned NOT NULL DEFAULT 0,
-          //       estoque  float(15,6) NOT NULL DEFAULT 0.000000,
-          //       local_produto  varchar(20) DEFAULT '',
-          //       local1_produto  varchar(20) DEFAULT '',
-          //       local2_produto  varchar(20) DEFAULT '',
-          //       local3_produto  varchar(20) DEFAULT '',
-          //       local4_produto  varchar(20) DEFAULT '',
-          //       data_recadastro  datetime NOT NULL DEFAULT '2000-01-01 00:00:00',
-          //      PRIMARY KEY (setor , produto ) USING BTREE,
-          //      KEY  PRODUTO  ( produto , setor ) USING BTREE
-          //      ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci ROW_FORMAT=DYNAMIC COMMENT='Produtos do Setor';
-          //  `,
+         
           ,
-            `
-            CREATE TABLE  IF NOT EXISTS ${databaseEventos}.produtos_enviados  (
-             id  int(11) NOT NULL AUTO_INCREMENT,
-             id_mobile  varchar(255) NOT NULL DEFAULT '0',
-             codigo_sistema  varchar(255) DEFAULT '0',
-            PRIMARY KEY ( id )
-            ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
-            `,
+             `CREATE TABLE  IF NOT EXISTS ${databaseEventos}.produtos_enviados (
+               id  int(11) NOT NULL AUTO_INCREMENT,
+               id_mobile  varchar(255) NOT NULL DEFAULT '0',
+               codigo_sistema  varchar(255) DEFAULT '0',
+               PRIMARY KEY ( id ),
+               KEY  codigo_sistema  ( codigo_sistema , id_mobile )
+          ) ENGINE=InnoDB AUTO_INCREMENT=77 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+             `,
             `CREATE TABLE  IF NOT EXISTS ${databaseEventos}.clientes_enviados  (
                id  int(11) NOT NULL AUTO_INCREMENT,
                id_mobile  varchar(255) NOT NULL DEFAULT '0',

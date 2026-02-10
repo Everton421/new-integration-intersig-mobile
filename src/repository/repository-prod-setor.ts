@@ -73,6 +73,6 @@ import { type message_prod_setor } from "../contracts/message-prod-setor.ts";
                         sql = sql + ` GROUP BY P.CODIGO) AS est;` 
                   }
                   const [ arrResult ] = await dbConn.query(sql);
-                     const result = arrResult  as resultStock[];
-                  return result[0] 
+                     const result = arrResult  as resultStock[] | [];
+                  return result  
     }
