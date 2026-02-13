@@ -90,9 +90,7 @@ export async function serviceSendSetor() {
                                                         const data = resultPut.data  as  result_api_post
                                                         await dbConn.query(`INSERT INTO ${EVENTOS}.setores_enviados set codigo_sistema = ${i.id_registro}, id_mobile= ${data.codigo }`)
                                                      }
-                                                
-
-                                }
+                                             }
 
                                 }
                     }
