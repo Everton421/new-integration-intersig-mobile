@@ -43,7 +43,7 @@ export async function serviceSendSetor() {
 
                                 const [ arrVerifySetor ] = await dbConn.query(`SELECT * FROM ${EVENTOS}.setores_enviados WHERE codigo_sistema = ${i.id_registro};`)
                                 const verifySetor = arrVerifySetor as  setores_enviados[]
-                                if(verifySetor.length > 0 ){
+                                if(verifySetor.length === 0 ){
 
                                         if(i.tipo_evento === 'UPDATE'){
                                                 const [ arrSetor] = await dbConn.query(`SELECT * FROM ${ESTOQUE}.setores WHERE CODIGO = ${i.id_registro};`)
