@@ -43,7 +43,7 @@ export async function serviceSendSetor() {
 
                                 const [ arrVerifySetor ] = await dbConn.query(`SELECT * FROM ${EVENTOS}.setores_enviados WHERE codigo_sistema = ${i.id_registro};`)
                                 const verifySetor = arrVerifySetor as  setores_enviados[]
-                                if(verifySetor.length === 0 ){
+                                if(verifySetor.length > 0 ){
 
                                         if(i.tipo_evento === 'UPDATE'){
                                                 const [ arrSetor] = await dbConn.query(`SELECT * FROM ${ESTOQUE}.setores WHERE CODIGO = ${i.id_registro};`)
@@ -66,7 +66,6 @@ export async function serviceSendSetor() {
                                                         const sql = `UPDATE ${EVENTOS}.eventos_setores_sistema SET status = 'PROCESSADO'   WHERE  id = ${i.id}  ;`
                                                         await dbConn.query(sql);
                                                         const data = resultPut.data  as  any
-                                                        await dbConn.query(`INSERT INTO ${EVENTOS}.setores_enviados set codigo_sistema = ${i.id_registro}, id_mobile= ${verifySetor[0].id_mobile}`)
                                                      }
                                         }
                                 }else{
