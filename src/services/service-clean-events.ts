@@ -6,8 +6,7 @@ import dbConn from "../connection/database-connection.ts";
 export async function cleanEvents(){
             console.log(" [V] Tarefa de limpeza de eventos agendada com sucesso.");
 
-         //cron.schedule('0 0 * * 7', async ()=>{
-         cron.schedule(' * * * * * ', async ()=>{
+         cron.schedule('0 0 * * 7', async ()=>{
             try{
                 console.log("Limpando eventos eventos_produtos_sistema ... ")
                 await dbConn.query(`DELETE  FROM ${databaseEventos}.eventos_produtos_sistema WHERE STATUS ='PROCESSADO';` );
