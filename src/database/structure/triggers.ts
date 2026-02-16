@@ -238,7 +238,7 @@ export const sqlTriggers = [
         AFTER DELETE ON ${vendas}.cad_orca
         FOR EACH ROW
         BEGIN
-            INSERT INTO ${databaseEventos}.eventos_recebimentos_sistema(tabela_origem, id_registro, tipo_evento, status)
+            INSERT INTO ${databaseEventos}.eventos_pedidos_sistema(tabela_origem, id_registro, tipo_evento, status)
             VALUES ('cad_orca', OLD.CODIGO, 'DELETE', 'PENDENTE');
         END`,
         /// 
