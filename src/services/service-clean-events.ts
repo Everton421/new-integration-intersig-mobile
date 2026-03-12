@@ -8,38 +8,12 @@ export async function cleanEvents(){
 
          cron.schedule('0 0 * * 7', async ()=>{
             try{
-                console.log("Limpando eventos eventos_produtos_sistema ... ")
-                await dbConn.query(`DELETE  FROM ${databaseEventos}.eventos_produtos_sistema WHERE STATUS ='PROCESSADO';` );
+                console.log("Limpando eventos eventos_sistema ... ")
+                await dbConn.query(`DELETE  FROM ${databaseEventos}.eventos_sistema WHERE STATUS ='PROCESSADO';` );
             }catch(e){
                 console.error("Erro ao tentar limpar eventos... ", e)
             }
-            try{
-                console.log("Limpando eventos eventos_setores_sistema ... ")
-               await dbConn.query(`  DELETE  FROM ${databaseEventos}.eventos_setores_sistema WHERE STATUS ='PROCESSADO';` );
-              }catch(e){
-                console.error("Erro ao tentar limpar eventos... ", e)
-            }
-            
-            try{ 
-                console.log("Limpando eventos  eventos_clientes_sistema ... ")
-              await dbConn.query(` DELETE  FROM ${databaseEventos}.eventos_clientes_sistema WHERE STATUS ='PROCESSADO';`);
-              }catch(e){
-                console.error("Erro ao tentar limpar eventos... ", e)
-            }
-  
-            try{ 
-                console.log("Limpando eventos eventos_recebimentos_sistema ... ")
-              await dbConn.query(` DELETE  FROM ${databaseEventos}.eventos_recebimentos_sistema WHERE STATUS ='PROCESSADO';`);
-              }catch(e){
-                console.error("Erro ao tentar limpar eventos... ", e)
-            }
-            try{ 
-                console.log("Limpando eventos eventos_pedidos_sistema ... ")
-                await dbConn.query(` DELETE  FROM ${databaseEventos}.eventos_pedidos_sistema WHERE STATUS ='PROCESSADO';`);
-            }catch(e){
-                console.error("Erro ao tentar limpar eventos... ", e)
-            }
-  
+           
          })
 
 }

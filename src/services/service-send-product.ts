@@ -1,9 +1,12 @@
 import dbConn, { ESTOQUE, EVENTOS, PUBLICO } from "../connection/database-connection.ts";
 import { type event } from "../contracts/event.ts";
 import { type prod_setor } from "../contracts/prod_setor.ts";
+import { type table_enviados } from "../contracts/table-enviados.ts";
 import { findStock } from "../repository/repository-prod-setor.ts";
 import { delay } from "../utils/delay.ts";
 import { api } from "./api.ts";
+import { postBrand, serviceSendBrands } from "./service-send-brands.ts";
+import { postCategory } from "./service-send-category.ts";
 
 type produtos_enviados = {
         id:number  
@@ -34,71 +37,11 @@ type resultProductMobile = {
 
 type postProductMobile = resultProductMobile & {grupo : { codigo:number } } & { marca:{ codigo:number }}
 
-export async function serviceSendProduct() {
+export async function serviceSendProduct(event: event) {
 
-        let exec = false;
-
-        setInterval(async () => {
-                if( exec ){
-                        console.log("Tarefa anterior em execução...");
-                        return
-                }
-                exec = true 
                 try{
-                        const origin = process.env.API_ORIGIN_NAME || 'erp_integration';
 
-                        console.log("[V] Verificando eventos_produtos_sistema ...")
-                        const [resultEvent] = await dbConn.query(`SELECT * FROM ${EVENTOS}.eventos_produtos_sistema WHERE status = 'PENDENTE' ;`)
-                        
-                        const event = resultEvent as event[]
-
-                        if (event.length > 0) {
-                                for (const i of event) {
-
-                                        if(i.tabela_origem === 'prod_setor'){
-                                                const [resultProdSetorSistema] = await dbConn.query(`SELECT * FROM ${ESTOQUE}.prod_setor WHERE produto = ${i.id_registro} AND setor = ${i.setor};`)
-                                                const arrProdSetorSistema = resultProdSetorSistema as prod_setor[]
-                                                const PROD_SETOR = arrProdSetorSistema[0] as prod_setor;
-                                                
-                                                const [ resultVerifyProduct ] = await dbConn.query(`SELECT * FROM ${EVENTOS}.produtos_enviados WHERE codigo_sistema = ${i.id_registro};`)   ; 
-                                                const arrVerifyItems = resultVerifyProduct as produtos_enviados[]
-                                                if(arrVerifyItems.length > 0 ){
-                                                        const data = {
-                                                                produto: arrVerifyItems[0].id_mobile,
-                                                                setor: PROD_SETOR.SETOR,
-                                                                data_recadastro: PROD_SETOR.DATA_RECAD,
-                                                                estoque: PROD_SETOR.ESTOQUE,
-                                                                local1_produto: PROD_SETOR.LOCAL1_PRODUTO || '',
-                                                                local2_produto: PROD_SETOR.LOCAL2_PRODUTO || '',
-                                                                local3_produto: PROD_SETOR.LOCAL3_PRODUTO || '',
-                                                                local4_produto: PROD_SETOR.LOCAL4_PRODUTO || '',
-                                                                local_produto: PROD_SETOR.LOCAL_PRODUTO || ''
-                                                        }
-                                                        console.log(` Enviando saldo produto ${PROD_SETOR.PRODUTO}...`, )
-                                                        await delay(500)
-                                                        const result = await api.post("/produto_setor", data,
-                                                                        {
-                                                                        headers:{
-                                                                                source: origin
-                                                                                }
-                                                                        }
-                                                                )
-
-                                                                if(result.status === 200){
-                                                                        const sql = `UPDATE ${EVENTOS}.eventos_produtos_sistema SET status = 'PROCESSADO'   WHERE  id = ${i.id}  ;`
-                                                                        await dbConn.query(sql);
-                                                                }
-                                                }else{
-                                                        console.log(`[X] Produto ${PROD_SETOR.PRODUTO} nao foi enviado.`)
-                                                }
-                                        }
-
-                                        if(i.tabela_origem === 'cad_prod' || i.tabela_origem === 'prod_tabprecos' || i.tabela_origem === 'pro_orca'){
-
-                                                const [ resultVerifyProduct ] = await dbConn.query(`SELECT * FROM ${EVENTOS}.produtos_enviados WHERE codigo_sistema = ${i.id_registro};`)   ; 
-                                                const arrVerifyItems = resultVerifyProduct as produtos_enviados[]
-
-                                                        let sql = ` SELECT  
+                                    let sql = ` SELECT  
                                                                         p.CODIGO codigo,  
                                                                         COALESCE(   ROUND(pp.preco,2 ),  0.00 ) as preco,
                                                                         COALESCE( p.GRUPO, 0) as grupo, 
@@ -123,23 +66,57 @@ export async function serviceSendProduct() {
                                                                                 left join  ${PUBLICO}.class_fiscal cf on cf.codigo = p.class_fiscal
                                                                                 left join  ${PUBLICO}.unid_prod und on und.produto = p.CODIGO and und.PADR_SAI = 'S' AND und.PADR_SEP= 'S' 
                                                                         WHERE 
-                                                                        p.CODIGO = '${i.id_registro}'
+                                                                        p.CODIGO = '${event.id_registro}'
                                                                         AND tp.padrao = 'S'
                                                                 --  AND p.ativo = 'S'
                                                                         group by  p.CODIGO
                                                                         order by p.CODIGO;  `
-                                                                        
-                                                if(arrVerifyItems.length > 0 ){
-                                                        // update produto 
-                                                console.log(` Atualizando  produto ${i.id_registro}...`, )
-
                                                 const [ result_cad_prod ] = await dbConn.query(sql);
                                                 const arrProduct = result_cad_prod  as resultProductMobile[]
-                                                        const grupo = { codigo: arrProduct[0].grupo };
-                                                        const marca = { codigo: arrProduct[0].marca };
+                                                const marcaErp= arrProduct[0].marca;
+                                                const grupoErp =arrProduct[0].grupo;
+
+                                                /// verifca se a marca já  foi enviada 
+                                                let id_marca_mobile=0;
+
+                                                         const [ resultVerifyBrand ] = await dbConn.query(`SELECT * FROM ${EVENTOS}.marcas_enviadas WHERE codigo_sistema = ${marcaErp};`) ;
+                                                                 const arrVerifyBrand = resultVerifyBrand as table_enviados[];
+                                                                 
+                                                         if(arrVerifyBrand.length === 0  ){
+                                                                const result = await postBrand(marcaErp)
+                                                                if(result.status === 200 ) id_marca_mobile= result.data.codigo
+                                                        } else{
+                                                                id_marca_mobile = arrVerifyBrand[0].id_mobile
+                                                        }
+
+                                                        const marca = { codigo: id_marca_mobile };
+
+                                                // verifca grupo
+                                                let id_categoria_mobile =0;         
+                                                         const [ resultVerifyCategory ] = await dbConn.query(`SELECT * FROM ${EVENTOS}.categorias_enviadas WHERE codigo_sistema = ${grupoErp};`) ;
+                                                           const arrVerifyCategory = resultVerifyCategory as table_enviados[];
+                                                         if(arrVerifyCategory.length === 0  ){
+                                                                const result = await postCategory(grupoErp)
+                                                                if(result.status === 200 ) id_categoria_mobile= result.data.codigo
+                                                        } else{
+                                                                 id_categoria_mobile = arrVerifyCategory[0].id_mobile
+                                                        }
+
+                                                        const grupo = { codigo: id_categoria_mobile };
+
+
+
+                                                const [ resultVerifyProduct ] = await dbConn.query(`SELECT * FROM ${EVENTOS}.produtos_enviados WHERE codigo_sistema = ${event.id_registro};`)   ; 
+                                                const arrVerifyItems = resultVerifyProduct as produtos_enviados[]
+                                                                        
+                                                if(arrVerifyItems.length > 0 ){
+                                                        
+                                                        // update produto 
+                                                console.log(` Atualizando  produto ${event.id_registro}...`, )
+
+                                                       
                                                         let iten = { ...arrProduct[0] , grupo :grupo ,marca:marca } as postProductMobile
                                                         
-
                                                         iten.codigo = arrVerifyItems[0].id_mobile;
 
                                                         const arrStock = await findStock(arrProduct[0].codigo);
@@ -148,33 +125,29 @@ export async function serviceSendProduct() {
 
                                                         iten.preco = Number(arrProduct[0].preco);      
 
-                                                        await delay(500)
+                                                        await delay(1000)
 
                                                         const resultPut = await api.put('/produto', iten);
                                                         if(resultPut.status === 200 ){
-                                                        const sql = `UPDATE ${EVENTOS}.eventos_produtos_sistema SET status = 'PROCESSADO'   WHERE  id = ${i.id}  ;`
+                                                        const sql = `UPDATE ${EVENTOS}.eventos_sistema SET status = 'PROCESSADO'   WHERE  id = ${event.id}  ;`
                                                         await dbConn.query(sql);
                                                         }
                                                 }else{
                                                         //post produto 
-                                                console.log(` Enviando   produto ${i.id_registro}...`, )
+                                                console.log(` Enviando   produto ${event.id_registro}...`, )
 
-                                                const [ result_cad_prod ] = await dbConn.query(sql);
-                                                        const arrProduct = result_cad_prod  as resultProductMobile[]
-                                                        const grupo = { codigo: arrProduct[0].grupo };
-                                                        const marca = { codigo: arrProduct[0].marca };
                                                         let iten = { ...arrProduct[0] , grupo :grupo ,marca:marca } as postProductMobile
                                                         
                                                         const arrStock = await findStock(arrProduct[0].codigo);
                                                                 iten.estoque =   0 
                                                                 if( arrStock.length > 0  ) iten.estoque = arrStock[0].ESTOQUE;
                                                         
-                                                                await delay(500)
+                                                        await delay(1000)
 
                                                         const resultPost = await api.post('/produto', iten);
 
                                                         if(resultPost.status === 200 ){
-                                                        const sql = `UPDATE ${EVENTOS}.eventos_produtos_sistema SET status = 'PROCESSADO'   WHERE  id = ${i.id}  ;`
+                                                        const sql = `UPDATE ${EVENTOS}.eventos_sistema SET status = 'PROCESSADO'   WHERE  id = ${event.id}  ;`
                                                         await dbConn.query(sql);
                                                         const data = resultPost.data  as  any
                                                         await dbConn.query(`INSERT INTO ${EVENTOS}.produtos_enviados set codigo_sistema = ${arrProduct[0].codigo}, id_mobile= ${data.codigo}`)
@@ -182,15 +155,10 @@ export async function serviceSendProduct() {
 
                                                 }
                                                 
-                                        }
-
-                                }
-                        }
+                                         
                 }catch(e){
                         console.log("Erro : ",e)
                 }finally{
-                exec = false 
                 }
 
-        }, 10000)
 }

@@ -21,21 +21,15 @@ type result_api_post ={
 export async function serviceSendSetor() {
         const dateService = new DateService();
 
-                let inExec = false;
 
-        setInterval(async () => {
                  try{
 
-                if(inExec){
-                        console.log("Tarefa anterior em execução...");
-                        return
-                }
-                        inExec = true
+                
 
                 const origin = process.env.API_ORIGIN_NAME || 'erp_integration';
 
                 console.log("[V] Verificando eventos_setores_sistema ...")
-                const [resultEvent] = await dbConn.query(`SELECT * FROM ${EVENTOS}.eventos_setores_sistema WHERE status = 'PENDENTE' ;`)
+                const [resultEvent] = await dbConn.query(`SELECT * FROM ${EVENTOS}.eventos_sistema WHERE status = 'PENDENTE' and tabela_origem = 'setores' ;`)
                 
                 const event = resultEvent as event[]
                 if (event.length > 0) {
@@ -63,7 +57,7 @@ export async function serviceSendSetor() {
                                                                         }
                                                                 )
                                                  if(resultPut.status === 200 ){
-                                                        const sql = `UPDATE ${EVENTOS}.eventos_setores_sistema SET status = 'PROCESSADO'   WHERE  id = ${i.id}  ;`
+                                                        const sql = `UPDATE ${EVENTOS}.eventos_sistema SET status = 'PROCESSADO'   WHERE  id = ${i.id}  ;`
                                                         await dbConn.query(sql);
                                                         const data = resultPut.data  as  any
                                                      }
@@ -85,7 +79,7 @@ export async function serviceSendSetor() {
                                                                         }
                                                                 )
                                                  if(resultPut.status === 200 ){
-                                                        const sql = `UPDATE ${EVENTOS}.eventos_setores_sistema SET status = 'PROCESSADO'   WHERE  id = ${i.id}  ;`
+                                                        const sql = `UPDATE ${EVENTOS}.eventos_sistema SET status = 'PROCESSADO'   WHERE  id = ${i.id}  ;`
                                                         await dbConn.query(sql);
                                                         const data = resultPut.data  as  result_api_post
                                                         await dbConn.query(`INSERT INTO ${EVENTOS}.setores_enviados set codigo_sistema = ${i.id_registro}, id_mobile= ${data.codigo }`)
@@ -99,7 +93,5 @@ export async function serviceSendSetor() {
                         console.log("ERRO : ", e );
 
                     }finally{
-                        inExec = false
                     }
-        }, 10000)
 }

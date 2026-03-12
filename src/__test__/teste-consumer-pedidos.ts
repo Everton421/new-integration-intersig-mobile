@@ -1,36 +1,52 @@
-import amqplib from 'amqplib'
+import { isQuestionOrExclamationToken } from "typescript";
+import { consumer } from "../broker/consumer.ts";
+import dbConn, { EVENTOS } from "../connection/database-connection.ts";
+import { pedidosRecebidos } from "../contracts/pedidos-recebidos.ts";
+import { insertPedido, updatePedido } from "../repository/repository-pedido.ts";
+import { api } from "../services/api.ts";
 
-export async function testeConsumerPedidos() {
-try{
+async function insertNewOrder(order:any){
+    if(order.codigo){
 
-        const conn = await amqplib.connect('amqp://localhost');
+           const [rows] =  await dbConn.query(`SELECT * FROM ${EVENTOS}.pedidos WHERE id_mobile = ${order.codigo} `);
+                    const verify = rows as pedidosRecebidos[];
+                    if( verify.length > 0 ){
+                        console.log(`O pedido já foi registrado anteriormente`)
+                    }else{
 
-    
-        const channel = await conn.createChannel();
-        const EXCHANGE = 'pedidos';
-        // garante que a exchange exista ( caso o producer nao tenha sido iniciado)
-          await channel.assertExchange( EXCHANGE,  'fanout', { durable: true});
-
-          // cria uma fila exclusiva para o ecommerce 
-          // se o nome for fixo as mensagens acumulam quando o app cai.
-         const q = await channel.assertQueue('pedidos', { durable: true });
-
-        // ** AMARRA  a fila do ecommerce na exchange do ERP
-        // tudo que chgar na exchange dos produtos será copiado para a fila do ecommerce
-
-        await channel.bindQueue(q.queue, EXCHANGE,'' );
-        console.log( " [*]  Aguardando pedidos  ... ");
-
-            channel.consume( q.queue, ( msg )=>{
-                if( msg){
-                    const content = JSON.parse( msg.content.toString());
-                    console.log(`[ Ecommerce ] atualizando pedidos ID ${content.id_registro}`)
-                
-                    channel.ack(msg);
+                const result = await api.get(`/pedido?codigo=${order.codigo}`);
+                        
+                if(result.data && result.data.length > 0 ){
+                      const resultInsert = await insertPedido(result.data[0] );
+//
+                 if(resultInsert){
+                     const resultInsertEvent = await dbConn.query(`INSERT INTO ${EVENTOS}.pedidos SET id_mobile = ${order.codigo}, codigo_sistema=${resultInsert} `);
+                 }
+                }else{
+                        console.log(`[X] Resulta da consulta vazio, codigo pedido: ${order.codigo}  `)
                 }
-            })   
-}catch( e ){
-    console.log('ERRO ', e);
-} 
 
+            }
+        }   
+
+}
+
+
+async function updateOrder(order:any){
+    if(order.codigo){
+            const [rows] =  await dbConn.query(`SELECT * FROM ${EVENTOS}.pedidos WHERE id_mobile = ${order.codigo} `);
+                    const verify = rows as pedidosRecebidos[];
+                    if( verify.length > 0 ){
+                const result = await api.get(`/pedido?codigo=${order.codigo}`);
+
+                 if(result.data && result.data.length > 0 ){
+                     await updatePedido(result.data[0], verify[0].codigo_sistema )    
+                 }
+
+               }
     }
+
+}
+
+await consumer('pedido.inserido', insertNewOrder);
+await consumer('pedido.atualizado', updateOrder);
