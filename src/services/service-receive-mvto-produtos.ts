@@ -1,5 +1,5 @@
-import { consumer } from "../broker/consumer.ts";
-import dbConn, { EVENTOS, VENDAS } from "../connection/database-connection.ts";
+import { consumer } from "../jobs/consumer-sistema.ts";
+import dbConn, { MOBILE, VENDAS } from "../connection/database-connection.ts";
 import { DateService } from "../utils/date.ts";
 
 type movimentos= {
@@ -33,7 +33,7 @@ type movimentos= {
 
      async function insertMvto_produtos(mvto:messagemMvtos ) {
         
-         const [ verifyMvtos ] = await dbConn.query(`SELECT * FROM ${EVENTOS}.movimentos_produtos where id_mobile = ${mvto.id}`)    
+         const [ verifyMvtos ] = await dbConn.query(`SELECT * FROM ${MOBILE}.movimentos_produtos where id_mobile = ${mvto.id}`)    
          const resultVerifyMvtos = verifyMvtos as movimentos[]
          const dateService = new DateService();
             
@@ -127,7 +127,7 @@ type movimentos= {
                      );`;
                    await dbConn.query(sqlInsertlog);
                   
-                     await dbConn.query(`INSERT INTO ${EVENTOS}.movimentos_produtos SET id_mobile =${mvto.id}, codigo_sistema = ${codigoAcerto};`)
+                     await dbConn.query(`INSERT INTO ${MOBILE}.movimentos_produtos SET id_mobile =${mvto.id}, codigo_sistema = ${codigoAcerto};`)
             }
     }
 

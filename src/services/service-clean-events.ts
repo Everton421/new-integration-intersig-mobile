@@ -1,17 +1,17 @@
 import cron from "node-cron";
 import dbConn from "../connection/database-connection.ts";
 
-        const databaseEventos = `\`${process.env.EVENTOS}\``;
+        const databaseMOBILE = `\`${process.env.MOBILE}\``;
 
 export async function cleanEvents(){
-            console.log(" [V] Tarefa de limpeza de eventos agendada com sucesso.");
+            console.log(" [V] Tarefa de limpeza de MOBILE agendada com sucesso.");
 
          cron.schedule('0 0 * * 7', async ()=>{
             try{
-                console.log("Limpando eventos eventos_sistema ... ")
-                await dbConn.query(`DELETE  FROM ${databaseEventos}.eventos_sistema WHERE STATUS ='PROCESSADO';` );
+                console.log("Limpando MOBILE MOBILE_sistema ... ")
+                await dbConn.query(`DELETE  FROM ${databaseMOBILE}.MOBILE_sistema WHERE STATUS ='PROCESSADO';` );
             }catch(e){
-                console.error("Erro ao tentar limpar eventos... ", e)
+                console.error("Erro ao tentar limpar MOBILE... ", e)
             }
            
          })

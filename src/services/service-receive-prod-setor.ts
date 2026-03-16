@@ -1,4 +1,4 @@
-import { consumer } from "../broker/consumer.ts";
+import { consumer } from "../jobs/consumer-sistema.ts";
 import { updateProdSetor } from "../repository/repository-prod-setor.ts";
 
 

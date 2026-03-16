@@ -1,4 +1,4 @@
-import dbConn, { EVENTOS, PUBLICO } from "../connection/database-connection.ts";
+import dbConn, { MOBILE, PUBLICO } from "../connection/database-connection.ts";
 import { type  event } from "../contracts/event.ts";
 import { type  table_enviados } from "../contracts/table-enviados.ts";
 import { type tipos_os } from "../contracts/tipos_os.ts";
@@ -10,7 +10,7 @@ export async function serviceSendTipoOs (event: event ){
 
                 const origin = process.env.API_ORIGIN_NAME || 'erp_integration';
 
-                console.log("[V] Verificando eventos tipos de os  ...")
+                console.log("[V] Verificando MOBILE tipos de os  ...")
 
                                           let sql = ` select 
                                                 t.*,
@@ -19,7 +19,7 @@ export async function serviceSendTipoOs (event: event ){
                                                 WHERE
                                                 t.CODIGO = ${event.id_registro} ;
                                                 `  
-                                                const [ resultVerify  ] = await dbConn.query(`SELECT * FROM ${EVENTOS}.tiposos_enviadas where codigo_sistema = ${event.id_registro};`);
+                                                const [ resultVerify  ] = await dbConn.query(`SELECT * FROM ${MOBILE}.tiposos_enviadas where codigo_sistema = ${event.id_registro};`);
                                                         
                                                 const arrVerifyTipoOs = resultVerify as table_enviados[]
                                                                const tipOsVerify =arrVerifyTipoOs[0];  
@@ -44,13 +44,6 @@ export async function serviceSendTipoOs (event: event ){
                                                                         }
                                                                 }
                                                         )
-                                                       
-
-                                                         if(resultPut.status === 200){
-                                                                 const sql = `UPDATE ${EVENTOS}.eventos_sistema SET status = 'PROCESSADO'   WHERE  id = ${event.id}  ;`
-                                                                 await dbConn.query(sql);
-                                                         }
-                                                  
 
                                                 }else{
                                                               const [ resultTipo_os ] = await dbConn.query(sql) 
@@ -72,10 +65,8 @@ export async function serviceSendTipoOs (event: event ){
                                                          )
 
                                                         if(resultPost.status === 200){
-                                                                const sql = `UPDATE ${EVENTOS}.eventos_sistema SET status = 'PROCESSADO'   WHERE  id = ${event.id}  ;`
-                                                                await dbConn.query(sql);
                                                                       const data = resultPost.data  as  any
-                                                    await dbConn.query(`INSERT INTO ${EVENTOS}.tiposos_enviadas set codigo_sistema = ${tipoOs.CODIGO}, id_mobile= ${data.codigo}`)
+                                                    await dbConn.query(`INSERT INTO ${MOBILE}.tiposos_enviadas set codigo_sistema = ${tipoOs.CODIGO}, id_mobile= ${data.codigo}`)
                                                         }
 
                                                 }

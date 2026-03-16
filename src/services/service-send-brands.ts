@@ -1,4 +1,4 @@
-import dbConn, { EVENTOS, PUBLICO } from "../connection/database-connection.ts";
+import dbConn, { MOBILE, PUBLICO } from "../connection/database-connection.ts";
 import { type cad_pmar } from "../contracts/cad_pmar.ts";
 import { type  event } from "../contracts/event.ts";
 import { type  table_enviados } from "../contracts/table-enviados.ts";
@@ -6,7 +6,7 @@ import { api } from "./api.ts";
 
 export async function serviceSendBrands (event: event ){
 
-                console.log("[V] Verificando eventos marcas ...")
+                console.log("[V] Verificando MOBILE marcas ...")
 
                                           let sql = ` select 
                                                 pm.*,
@@ -16,7 +16,7 @@ export async function serviceSendBrands (event: event ){
                                                 WHERE
                                                 pm.CODIGO = ${event.id_registro} ;
                                                 `  
-                                                const [ resultVerifyBrands  ] = await dbConn.query(`SELECT * FROM ${EVENTOS}.marcas_enviadas where codigo_sistema = ${event.id_registro};`);
+                                                const [ resultVerifyBrands  ] = await dbConn.query(`SELECT * FROM ${MOBILE}.marcas_enviadas where codigo_sistema = ${event.id_registro};`);
                                                         
                                                 const arrVerifyBrands = resultVerifyBrands as table_enviados[]
                                                                const brandVerify =arrVerifyBrands[0];  
@@ -29,10 +29,7 @@ export async function serviceSendBrands (event: event ){
                                                   }else{
                                                            const resultPost  =   await postBrand(event.id_registro);
                                                              status = resultPost.status   
-                                                        if(resultPost.status === 200){
-                                                                const sql = `UPDATE ${EVENTOS}.eventos_sistema SET status = 'PROCESSADO'   WHERE  id = ${event.id}  ;`
-                                                                await dbConn.query(sql);
-                                                        }
+                                                     
                                                 }
                                        
                                                 return status;
@@ -68,7 +65,7 @@ export async function serviceSendBrands (event: event ){
                                                                 }
                                                         )
                                                         resultPost.data as { id:number, data_cadastro: string ,data_recadastro: string , descricao: string  } 
-                                                    await dbConn.query(`INSERT INTO ${EVENTOS}.marcas_enviadas set codigo_sistema = ${codigo}, id_mobile= ${resultPost.data.codigo}`)
+                                                    await dbConn.query(`INSERT INTO ${MOBILE}.marcas_enviadas set codigo_sistema = ${codigo}, id_mobile= ${resultPost.data.codigo}`)
 
                                                            return  resultPost    
 

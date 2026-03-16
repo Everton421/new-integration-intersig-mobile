@@ -1,4 +1,4 @@
-import dbConn, { ESTOQUE, EVENTOS, PUBLICO } from "../connection/database-connection.ts";
+import dbConn, { ESTOQUE, MOBILE, PUBLICO } from "../connection/database-connection.ts";
 import { type event } from "../contracts/event.ts";
 import { type prod_setor } from "../contracts/prod_setor.ts";
 import { findStock } from "../repository/repository-prod-setor.ts";
@@ -23,7 +23,7 @@ export async function serviceSendProdSetor(event: event) {
                                                 const arrProdSetorSistema = resultProdSetorSistema as prod_setor[]
                                                 const PROD_SETOR = arrProdSetorSistema[0] as prod_setor;
                                                 
-                                                const [ resultVerifyProduct ] = await dbConn.query(`SELECT * FROM ${EVENTOS}.produtos_enviados WHERE codigo_sistema = ${event.id_registro};`)   ; 
+                                                const [ resultVerifyProduct ] = await dbConn.query(`SELECT * FROM ${MOBILE}.produtos_enviados WHERE codigo_sistema = ${event.id_registro};`)   ; 
                                                 const arrVerifyItems = resultVerifyProduct as produtos_enviados[]
                                                 if(arrVerifyItems.length > 0 ){
                                                         const data = {
@@ -47,10 +47,6 @@ export async function serviceSendProdSetor(event: event) {
                                                                         }
                                                                 )
 
-                                                                if(result.status === 200){
-                                                                        const sql = `UPDATE ${EVENTOS}.eventos_sistema SET status = 'PROCESSADO'   WHERE  id = ${event.id}  ;`
-                                                                        await dbConn.query(sql);
-                                                                }
                                                 }else{
                                                         console.log(`[X] Produto ${PROD_SETOR.PRODUTO} nao foi enviado.`)
                                                 }

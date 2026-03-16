@@ -1,4 +1,4 @@
-import dbConn, { EVENTOS } from "../connection/database-connection.ts";
+import dbConn, { MOBILE } from "../connection/database-connection.ts";
 import { type  event } from "../contracts/event.ts";
 import { serviceSendBrands } from "../services/service-send-brands.ts";
 import { serviceSendCategory } from "../services/service-send-category.ts";
@@ -19,7 +19,7 @@ export async function mainTask () {
                         console.log("Tarefa anterior em execução...");
                         return
                 }
-                        const [resultEvent] = await dbConn.query(`SELECT * FROM ${EVENTOS}.eventos_sistema WHERE status = 'PENDENTE' ;`)
+                        const [resultEvent] = await dbConn.query(`SELECT * FROM ${MOBILE}.MOBILE_sistema WHERE status = 'PENDENTE' ;`)
 
                         const event = resultEvent as event[]
 

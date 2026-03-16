@@ -1,4 +1,4 @@
-import dbConn, { EVENTOS, PUBLICO } from "../connection/database-connection.ts";
+import dbConn, { MOBILE, PUBLICO } from "../connection/database-connection.ts";
 import { type cad_pmar } from "../contracts/cad_pmar.ts";
 import { type  event } from "../contracts/event.ts";
 import { type  table_enviados } from "../contracts/table-enviados.ts";
@@ -7,7 +7,7 @@ import { api } from "./api.ts";
 export async function serviceSendCategory (event: event ){
 
 
-                console.log("[V] Verificando eventos categorias ...")
+                console.log("[V] Verificando MOBILE categorias ...")
 
                                           let sql = ` select 
                                                 pm.*,
@@ -17,7 +17,7 @@ export async function serviceSendCategory (event: event ){
                                                 WHERE
                                                 pm.CODIGO = ${event.id_registro} ;
                                                 `  
-                                                const [ resultVerifycategory  ] = await dbConn.query(`SELECT * FROM ${EVENTOS}.categorias_enviadas where codigo_sistema = ${event.id_registro};`);
+                                                const [ resultVerifycategory  ] = await dbConn.query(`SELECT * FROM ${MOBILE}.categorias_enviadas where codigo_sistema = ${event.id_registro};`);
                                                         
                                                 const arrVerifycategory = resultVerifycategory as table_enviados[]
                                                                const categoryVerify = arrVerifycategory[0];  
@@ -25,20 +25,11 @@ export async function serviceSendCategory (event: event ){
                                                 if(arrVerifycategory.length > 0 ){
                                                      
                                                         const resultPut = await putCategory(event.id_registro,categoryVerify.id_mobile );
-                                                        if(resultPut.status === 200){
-                                                                const sql = `UPDATE ${EVENTOS}.eventos_sistema SET status = 'PROCESSADO'   WHERE  id = ${event.id} ;`
-                                                                await dbConn.query(sql);
-                                                        }
                                                   
                                                 }else{
                                                            const resultPost    = await postCategory(event.id_registro);
 
-                                                        if(resultPost.status === 200){
-                                                                    const sqlUpdate = `UPDATE ${EVENTOS}.eventos_sistema SET status = 'PROCESSADO'   WHERE  id = ${event.id}  ;`
-                                                                         await dbConn.query(sqlUpdate);
-                                                                  
                                                         }
-                                                }
 }
 
 
@@ -73,7 +64,7 @@ export async function postCategory ( codigo:number) {
                                                                 }
                                                         )
                                                         if(resultPost.status === 200 ){
-                                                                    const insert= `INSERT INTO ${EVENTOS}.categorias_enviadas set codigo_sistema = ${brand.CODIGO}, id_mobile= ${resultPost.data.codigo};`;
+                                                                    const insert= `INSERT INTO ${MOBILE}.categorias_enviadas set codigo_sistema = ${brand.CODIGO}, id_mobile= ${resultPost.data.codigo};`;
                                                                    await dbConn.query(insert);
                                                         }
                                       return resultPost;

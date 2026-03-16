@@ -1,7 +1,8 @@
-import { mainTask } from "./jobs/main.ts";
+import { seed } from "./database/seed/seed.ts";
+import { consumer_sistema } from "./jobs/consumer-sistema.ts";
 import { cleanEvents } from "./services/service-clean-events.ts";
  
 
-await mainTask ()
-
+await consumer_sistema();
      await cleanEvents();
+     await seed( )

@@ -1,4 +1,4 @@
-import dbConn, { ESTOQUE, EVENTOS, PUBLICO } from "../connection/database-connection.ts";
+import dbConn, { ESTOQUE, MOBILE, PUBLICO } from "../connection/database-connection.ts";
 import { type event } from "../contracts/event.ts";
 import { type prod_setor } from "../contracts/prod_setor.ts";
 import { type table_enviados } from "../contracts/table-enviados.ts";
@@ -35,7 +35,7 @@ type resultProductMobile = {
         observacoes3: string
 }
 
-type postProductMobile = resultProductMobile & {grupo : { codigo:number } } & { marca:{ codigo:number }}
+type postProductMobile = resultProductMobile & {id:number } & {grupo : { codigo:number } } & { marca:{ codigo:number }}
 
 export async function serviceSendProduct(event: event) {
 
@@ -79,7 +79,7 @@ export async function serviceSendProduct(event: event) {
                                                 /// verifca se a marca já  foi enviada 
                                                 let id_marca_mobile=0;
 
-                                                         const [ resultVerifyBrand ] = await dbConn.query(`SELECT * FROM ${EVENTOS}.marcas_enviadas WHERE codigo_sistema = ${marcaErp};`) ;
+                                                         const [ resultVerifyBrand ] = await dbConn.query(`SELECT * FROM ${MOBILE}.marcas_enviadas WHERE codigo_sistema = ${marcaErp};`) ;
                                                                  const arrVerifyBrand = resultVerifyBrand as table_enviados[];
                                                                  
                                                          if(arrVerifyBrand.length === 0  ){
@@ -93,7 +93,7 @@ export async function serviceSendProduct(event: event) {
 
                                                 // verifca grupo
                                                 let id_categoria_mobile =0;         
-                                                         const [ resultVerifyCategory ] = await dbConn.query(`SELECT * FROM ${EVENTOS}.categorias_enviadas WHERE codigo_sistema = ${grupoErp};`) ;
+                                                         const [ resultVerifyCategory ] = await dbConn.query(`SELECT * FROM ${MOBILE}.categorias_enviadas WHERE codigo_sistema = ${grupoErp};`) ;
                                                            const arrVerifyCategory = resultVerifyCategory as table_enviados[];
                                                          if(arrVerifyCategory.length === 0  ){
                                                                 const result = await postCategory(grupoErp)
@@ -106,7 +106,7 @@ export async function serviceSendProduct(event: event) {
 
 
 
-                                                const [ resultVerifyProduct ] = await dbConn.query(`SELECT * FROM ${EVENTOS}.produtos_enviados WHERE codigo_sistema = ${event.id_registro};`)   ; 
+                                                const [ resultVerifyProduct ] = await dbConn.query(`SELECT * FROM ${MOBILE}.produtos_enviados WHERE codigo_sistema = ${event.id_registro};`)   ; 
                                                 const arrVerifyItems = resultVerifyProduct as produtos_enviados[]
                                                                         
                                                 if(arrVerifyItems.length > 0 ){
@@ -115,7 +115,7 @@ export async function serviceSendProduct(event: event) {
                                                 console.log(` Atualizando  produto ${event.id_registro}...`, )
 
                                                        
-                                                        let iten = { ...arrProduct[0] , grupo :grupo ,marca:marca } as postProductMobile
+                                                        let iten = { ...arrProduct[0] , id:arrProduct[0].codigo , grupo :grupo ,marca:marca } as postProductMobile
                                                         
                                                         iten.codigo = arrVerifyItems[0].id_mobile;
 
@@ -129,14 +129,14 @@ export async function serviceSendProduct(event: event) {
 
                                                         const resultPut = await api.put('/produto', iten);
                                                         if(resultPut.status === 200 ){
-                                                        const sql = `UPDATE ${EVENTOS}.eventos_sistema SET status = 'PROCESSADO'   WHERE  id = ${event.id}  ;`
-                                                        await dbConn.query(sql);
+                                                      //  const sql = `UPDATE ${MOBILE}.MOBILE_sistema SET status = 'PROCESSADO'   WHERE  id = ${event.id}  ;`
+                                                      //  await dbConn.query(sql);
                                                         }
                                                 }else{
                                                         //post produto 
                                                 console.log(` Enviando   produto ${event.id_registro}...`, )
 
-                                                        let iten = { ...arrProduct[0] , grupo :grupo ,marca:marca } as postProductMobile
+                                                        let iten = { ...arrProduct[0] ,  id:arrProduct[0].codigo ,grupo :grupo ,marca:marca } as postProductMobile
                                                         
                                                         const arrStock = await findStock(arrProduct[0].codigo);
                                                                 iten.estoque =   0 
@@ -147,10 +147,10 @@ export async function serviceSendProduct(event: event) {
                                                         const resultPost = await api.post('/produto', iten);
 
                                                         if(resultPost.status === 200 ){
-                                                        const sql = `UPDATE ${EVENTOS}.eventos_sistema SET status = 'PROCESSADO'   WHERE  id = ${event.id}  ;`
-                                                        await dbConn.query(sql);
+                                                      //  const sql = `UPDATE ${MOBILE}.MOBILE_sistema SET status = 'PROCESSADO'   WHERE  id = ${event.id}  ;`
+                                                      //  await dbConn.query(sql);
                                                         const data = resultPost.data  as  any
-                                                        await dbConn.query(`INSERT INTO ${EVENTOS}.produtos_enviados set codigo_sistema = ${arrProduct[0].codigo}, id_mobile= ${data.codigo}`)
+                                                        await dbConn.query(`INSERT INTO ${MOBILE}.produtos_enviados set codigo_sistema = ${arrProduct[0].codigo}, id_mobile= ${data.codigo}`)
                                                         }
 
                                                 }

@@ -1,4 +1,4 @@
-import dbConn, { ESTOQUE, EVENTOS, PUBLICO } from "../connection/database-connection.ts";
+import dbConn, { ESTOQUE, MOBILE, PUBLICO } from "../connection/database-connection.ts";
 import { type event } from "../contracts/event.ts";
 import {type setores } from "../contracts/setores.ts";
 import { DateService } from "../utils/date.ts";
@@ -18,29 +18,22 @@ type result_api_post ={
         data_recadastro : string
 
 }
-export async function serviceSendSetor() {
+export async function serviceSendSetor(event:event) {
         const dateService = new DateService();
-
-
                  try{
 
                 
 
                 const origin = process.env.API_ORIGIN_NAME || 'erp_integration';
 
-                console.log("[V] Verificando eventos_setores_sistema ...")
-                const [resultEvent] = await dbConn.query(`SELECT * FROM ${EVENTOS}.eventos_sistema WHERE status = 'PENDENTE' and tabela_origem = 'setores' ;`)
+                console.log("[V] Verificando MOBILE_setores_sistema ...")
                 
-                const event = resultEvent as event[]
-                if (event.length > 0) {
-                        for (const i of event) {
-
-                                const [ arrVerifySetor ] = await dbConn.query(`SELECT * FROM ${EVENTOS}.setores_enviados WHERE codigo_sistema = ${i.id_registro};`)
+                                const [ arrVerifySetor ] = await dbConn.query(`SELECT * FROM ${MOBILE}.setores_enviados WHERE codigo_sistema = ${event.id_registro};`)
                                 const verifySetor = arrVerifySetor as  setores_enviados[]
                                 if(verifySetor.length > 0 ){
 
-                                        if(i.tipo_evento === 'UPDATE'){
-                                                const [ arrSetor] = await dbConn.query(`SELECT * FROM ${ESTOQUE}.setores WHERE CODIGO = ${i.id_registro};`)
+                                        if(event.tipo_evento === 'UPDATE'){
+                                                const [ arrSetor] = await dbConn.query(`SELECT * FROM ${ESTOQUE}.setores WHERE CODIGO = ${event.id_registro};`)
                                                         const setor = arrSetor as setores[]
                                                 const data = { 
                                                         codigo: verifySetor[0].id_mobile,
@@ -56,14 +49,10 @@ export async function serviceSendSetor() {
                                                                                 }
                                                                         }
                                                                 )
-                                                 if(resultPut.status === 200 ){
-                                                        const sql = `UPDATE ${EVENTOS}.eventos_sistema SET status = 'PROCESSADO'   WHERE  id = ${i.id}  ;`
-                                                        await dbConn.query(sql);
-                                                        const data = resultPut.data  as  any
-                                                     }
+                                          
                                         }
-                                }else{
-                                                   const [ arrSetor] = await dbConn.query(`SELECT * FROM ${ESTOQUE}.setores WHERE CODIGO = ${i.id_registro};`)
+                                  }else{
+                                                   const [ arrSetor] = await dbConn.query(`SELECT * FROM ${ESTOQUE}.setores WHERE CODIGO = ${event.id_registro};`)
                                                         const setor = arrSetor as setores[]
                                                 const data = { 
                                                         descricao: setor[0].NOME,
@@ -79,15 +68,11 @@ export async function serviceSendSetor() {
                                                                         }
                                                                 )
                                                  if(resultPut.status === 200 ){
-                                                        const sql = `UPDATE ${EVENTOS}.eventos_sistema SET status = 'PROCESSADO'   WHERE  id = ${i.id}  ;`
-                                                        await dbConn.query(sql);
                                                         const data = resultPut.data  as  result_api_post
-                                                        await dbConn.query(`INSERT INTO ${EVENTOS}.setores_enviados set codigo_sistema = ${i.id_registro}, id_mobile= ${data.codigo }`)
+                                                        await dbConn.query(`INSERT INTO ${MOBILE}.setores_enviados set codigo_sistema = ${event.id_registro}, id_mobile= ${data.codigo }`)
                                                      }
                                              }
 
-                                }
-                    }
 
                     }catch(e){  
                         console.log("ERRO : ", e );

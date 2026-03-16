@@ -1,4 +1,4 @@
-import dbConn, { EVENTOS, PUBLICO } from "../connection/database-connection.ts";
+import dbConn, { MOBILE, PUBLICO } from "../connection/database-connection.ts";
 import {type  cad_serv } from "../contracts/cad_serv.ts";
 import { type  event } from "../contracts/event.ts";
 import { type  table_enviados } from "../contracts/table-enviados.ts";
@@ -10,7 +10,7 @@ export async function serviceSendServices (event: event ){
 
                 const origin = process.env.API_ORIGIN_NAME || 'erp_integration';
 
-                console.log("[V] Verificando eventos servicos ...")
+                console.log("[V] Verificando MOBILE servicos ...")
 
                                           let sql = ` select 
                                                 cs.*,
@@ -19,7 +19,7 @@ export async function serviceSendServices (event: event ){
                                                 WHERE
                                                 cs.CODIGO = ${event.id_registro} ;
                                                 `  
-                                                const [ resultVerifyServices  ] = await dbConn.query(`SELECT * FROM ${EVENTOS}.servicos_enviados where codigo_sistema = ${event.id_registro};`);
+                                                const [ resultVerifyServices  ] = await dbConn.query(`SELECT * FROM ${MOBILE}.servicos_enviados where codigo_sistema = ${event.id_registro};`);
                                                         
                                                 const arrVerifyServices = resultVerifyServices as table_enviados[]
                                                                const serviceVerify =arrVerifyServices[0];  
@@ -49,12 +49,6 @@ export async function serviceSendServices (event: event ){
                                                         )
                                                        
 
-                                                         if(resultPut.status === 200){
-                                                                 const sql = `UPDATE ${EVENTOS}.eventos_sistema SET status = 'PROCESSADO'   WHERE  id = ${event.id}  ;`
-                                                                 await dbConn.query(sql);
-                                                         }
-                                                  
-
                                                 }else{
                                                                 const [ resultCad_serv ] = await dbConn.query(sql) 
                                                                  const arrServ = resultCad_serv as cad_serv[] ;
@@ -79,10 +73,8 @@ export async function serviceSendServices (event: event ){
                                                          )
 
                                                         if(resultPost.status === 200){
-                                                                const sql = `UPDATE ${EVENTOS}.eventos_sistema SET status = 'PROCESSADO'   WHERE  id = ${event.id}  ;`
-                                                                await dbConn.query(sql);
                                                                       const data = resultPost.data  as  any
-                                                                     await dbConn.query(`INSERT INTO ${EVENTOS}.servicos_enviados set codigo_sistema = ${serv.CODIGO}, id_mobile= ${data.codigo}`)
+                                                                     await dbConn.query(`INSERT INTO ${MOBILE}.servicos_enviados set codigo_sistema = ${serv.CODIGO}, id_mobile= ${data.codigo}`)
                                                         }
                                                          
 

@@ -12,7 +12,7 @@ const DB_CONFIG = {
                       password: process.env.PASSWORD,
                       connectionLimit: 10
                     };
-   export  const EVENTOS = `\`${process.env.EVENTOS}\``;
+   export  const MOBILE = `\`${process.env.MOBILE}\``;
 
 
  const dbConn = await mysql.createPool(DB_CONFIG);
