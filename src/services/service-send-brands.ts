@@ -24,12 +24,11 @@ export async function serviceSendBrands (event: event ){
                                                 if(arrVerifyBrands.length > 0 ){
                                                       
                                                           const resultPut = await putBrand(event.id_registro, brandVerify.id_mobile);
-                                                             status = resultPut.status   
+                                                             status = resultPut  !== undefined ?   resultPut.status : 400
                                                 
                                                   }else{
                                                            const resultPost  =   await postBrand(event.id_registro);
-                                                             status = resultPost.status   
-                                                     
+                                                             status = resultPost  !== undefined ?   resultPost.status : 400
                                                 }
                                        
                                                 return status;
@@ -47,9 +46,11 @@ export async function serviceSendBrands (event: event ){
                                                 pm.CODIGO = ${codigo} ;
                                                 `
                                           const [ resultPmar ] = await dbConn.query(sql) 
-                                                                   const arrPmar = resultPmar as cad_pmar[] ;
-                                                                   const brand = arrPmar[0]
+                                                  const arrPmar = resultPmar as cad_pmar[] ;
 
+                                          if(arrPmar.length > 0 ){
+
+                                                                   const brand = arrPmar[0]
                                                                  const data = {
                                                                         id: brand.CODIGO,
                                                                         descricao: brand.DESCRICAO,
@@ -66,8 +67,12 @@ export async function serviceSendBrands (event: event ){
                                                         )
                                                         resultPost.data as { id:number, data_cadastro: string ,data_recadastro: string , descricao: string  } 
                                                     await dbConn.query(`INSERT INTO ${MOBILE}.marcas_enviadas set codigo_sistema = ${codigo}, id_mobile= ${resultPost.data.codigo}`)
-
                                                            return  resultPost    
+
+                                                }else{
+                                                        console.log(`[X] Marca : ${codigo} não foi encontrada. ` )
+                                                        return;
+                                                }
 
                         }
 
@@ -86,7 +91,10 @@ export async function serviceSendBrands (event: event ){
                                           
                                     const [ resultPmar ] = await dbConn.query(sql) 
                                                                 const arrPmar = resultPmar as cad_pmar[] ;
-                                                              const brand = arrPmar[0]
+                                         
+                                          if(arrPmar.length > 0 ){
+
+                                                                const brand = arrPmar[0]
 
                                                                 const data = {
                                                                         codigo: id_mobile, 
@@ -106,4 +114,8 @@ export async function serviceSendBrands (event: event ){
                                                          resultPut.data as { id:number, data_cadastro: string ,data_recadastro: string , descricao: string  } 
                                                            return  resultPut ;     
 
+                                                        }else{
+                                                               console.log(`[X] Marca : ${codigo} não foi encontrada. ` )
+                                                                   return;  
                                                         }
+                                           }

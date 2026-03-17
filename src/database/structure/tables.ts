@@ -119,21 +119,7 @@
                 KEY  codigo_sistema  ( codigo_sistema , id_mobile )
             ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;`,
           
-            `  CREATE TABLE IF NOT EXISTS ${database_mobile}.MOBILE_sistema (
-              id  int(11) NOT NULL AUTO_INCREMENT,
-              tabela_origem  varchar(50) DEFAULT NULL,
-              id_registro  int(11) DEFAULT NULL,
-              tipo_evento  enum('INSERT','UPDATE','DELETE') NOT NULL DEFAULT 'INSERT',
-              dados_json  blob DEFAULT NULL,
-              status  enum('PENDENTE','PROCESSADO','ERRO') DEFAULT 'PENDENTE',
-              setor int(11) DEFAULT 0,
-              tabela int(11) DEFAULT 0,
-              id_message  varchar(255) DEFAULT NULL,
-              createdAt timestamp NULL DEFAULT current_timestamp(),
-              updatedAt timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-              PRIMARY KEY ( id )
-              ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci; ` 
-            
+         
               
         ] 
 

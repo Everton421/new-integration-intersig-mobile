@@ -2,6 +2,7 @@ import dbConn, { MOBILE, PUBLICO } from "../connection/database-connection.ts";
 import { type cad_clie } from "../contracts/cad_clie.ts";
 import { type event } from "../contracts/event.ts";
 import { type table_enviados } from "../contracts/table-enviados.ts";
+import { DateService } from "../utils/date.ts";
 import { api } from "./api.ts";
 
 type clientes_enviados = {
@@ -16,6 +17,7 @@ export async function serviceSendClient(event:event) {
 
                 console.log("[V] Verificando MOBILE_clientes_sistema ...")
                 
+                const dateService = new DateService();
 
                                           let sql = ` select *,
                                                 DATE_FORMAT(DATA_CADASTRO, '%Y-%m-%d') AS DATA_CADASTRO,
@@ -35,7 +37,7 @@ export async function serviceSendClient(event:event) {
                                                               const client = arrClient[0]
 
                                                                 const data = {
-                                                                        codigo: clientVerify.codigo_sistema, 
+                                                                        codigo: clientVerify.id_mobile, 
                                                                         id: clientVerify.codigo_sistema,
                                                                         celular : client.CELULAR, 
                                                                         nome: client.NOME ,
@@ -45,13 +47,12 @@ export async function serviceSendClient(event:event) {
                                                                         numero: client.NUMERO,
                                                                         cnpj: client.CPF,
                                                                         cidade:client.CIDADE ,
-                                                                        data_cadastro: client.DATA_CADASTRO ,
-                                                                        data_recadastro: client.DATA_RECAD,
-                                                                        vendedor: client.VENDEDOR,
+                                                                        data_cadastro: dateService.obterDataAtual() ,
+                                                                        data_recadastro: dateService.obterDataHoraAtual(),
+                                                                        vendedor: 0,
                                                                         bairro: client.BAIRRO,
                                                                         estado: client.ESTADO
                                                                 }
-                                        
                                                 const resultPut = await api.put("/cliente", data,
                                                                 {
                                                                 headers:{
@@ -76,8 +77,8 @@ export async function serviceSendClient(event:event) {
                                                                         numero: client.NUMERO,
                                                                         cnpj: client.CPF,
                                                                         cidade:client.CIDADE ,
-                                                                        data_cadastro: client.DATA_CADASTRO ,
-                                                                        data_recadastro: client.DATA_RECAD,
+                                                                        data_cadastro: dateService.obterDataAtual() ,
+                                                                        data_recadastro: dateService.obterDataHoraAtual(),
                                                                         vendedor: client.VENDEDOR,
                                                                         bairro: client.BAIRRO,
                                                                         estado: client.ESTADO

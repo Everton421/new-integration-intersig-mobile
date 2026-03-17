@@ -17,6 +17,7 @@
   "dependencies": {
     "amqplib": "^0.10.9",
     "axios": "^1.13.4",
+    "dayjs": "^1.11.20",
     "mysql2": "^3.16.1",
     "node-cron": "^4.2.1",
     "node-schedule": "^2.1.1",

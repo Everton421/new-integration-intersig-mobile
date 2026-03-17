@@ -38,6 +38,7 @@ type resultProductMobile = {
 type postProductMobile = resultProductMobile & {id:number } & {grupo : { codigo:number } } & { marca:{ codigo:number }}
 
 export async function serviceSendProduct(event: event) {
+        await delay(1000)
 
                 try{
 
@@ -73,8 +74,8 @@ export async function serviceSendProduct(event: event) {
                                                                         order by p.CODIGO;  `
                                                 const [ result_cad_prod ] = await dbConn.query(sql);
                                                 const arrProduct = result_cad_prod  as resultProductMobile[]
-                                                const marcaErp= arrProduct[0].marca;
-                                                const grupoErp =arrProduct[0].grupo;
+                                                const marcaErp= arrProduct[0].marca || 0;
+                                                const grupoErp =arrProduct[0].grupo || 0;
 
                                                 /// verifca se a marca já  foi enviada 
                                                 let id_marca_mobile=0;
@@ -84,7 +85,7 @@ export async function serviceSendProduct(event: event) {
                                                                  
                                                          if(arrVerifyBrand.length === 0  ){
                                                                 const result = await postBrand(marcaErp)
-                                                                if(result.status === 200 ) id_marca_mobile= result.data.codigo
+                                                                if(result && result.status === 200 ) id_marca_mobile= result.data.codigo
                                                         } else{
                                                                 id_marca_mobile = arrVerifyBrand[0].id_mobile
                                                         }
@@ -97,6 +98,9 @@ export async function serviceSendProduct(event: event) {
                                                            const arrVerifyCategory = resultVerifyCategory as table_enviados[];
                                                          if(arrVerifyCategory.length === 0  ){
                                                                 const result = await postCategory(grupoErp)
+                                                                if(result === undefined ){
+                                                                        return;
+                                                                }
                                                                 if(result.status === 200 ) id_categoria_mobile= result.data.codigo
                                                         } else{
                                                                  id_categoria_mobile = arrVerifyCategory[0].id_mobile
@@ -125,7 +129,6 @@ export async function serviceSendProduct(event: event) {
 
                                                         iten.preco = Number(arrProduct[0].preco);      
 
-                                                        await delay(1000)
 
                                                         const resultPut = await api.put('/produto', iten);
                                                         if(resultPut.status === 200 ){
@@ -142,7 +145,6 @@ export async function serviceSendProduct(event: event) {
                                                                 iten.estoque =   0 
                                                                 if( arrStock.length > 0  ) iten.estoque = arrStock[0].ESTOQUE;
                                                         
-                                                        await delay(1000)
 
                                                         const resultPost = await api.post('/produto', iten);
 

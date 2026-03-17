@@ -1,4 +1,8 @@
 import amqplib from 'amqplib'
+import dbConn, { MOBILE } from '../connection/database-connection.ts';
+import { type  table_enviados } from '../contracts/table-enviados.ts';
+import { api } from '../services/api.ts';
+import { type IPedidoSistema, updatePedido } from '../repository/repository-pedido.ts';
 
 export async function consumerMobile(domain:string) {
     
@@ -39,11 +43,30 @@ try{
               try{
   
                 let conteudo = JSON.parse(msg.content.toString());
-
-                console.log(`[v] Recebido em [${uniqueQueueName}]  | Key: ${msg.fields.routingKey}`  );
+                if(conteudo.metadata.origin != origin ){
+                
+                    const codigoMobile = conteudo.data.codigo  
+                    const [arrVerifyOrder] = await dbConn.query(`SELECT * FROM ${MOBILE}.pedidos WHERE id_mobile = ${codigoMobile}`);
+                    const verifyOrder = arrVerifyOrder as table_enviados[];
                     
-                console.log(conteudo)
+                    const resultApiOrder = await api.get(`/pedido?codigo=${codigoMobile}`);
+                          if(resultApiOrder.data.length >  0){
+                               const order = resultApiOrder.data[0] as IPedidoSistema ; 
+                                  await updatePedido(order,verifyOrder[0].codigo_sistema );
 
+                          }else{
+
+                      console.log(`[X] não foi encontrado pedido codigo ${codigoMobile} na consulta da api.`)
+                          }  
+
+                    if(verifyOrder.length > 0 ){
+
+                       
+                    }else{
+                      console.log(`[X] não foi encontrado pedido codigo ${codigoMobile} na tabela de pedidos.`)
+                    }
+                }
+                console.log(`[v] Recebido em [${uniqueQueueName}]  | Key: ${msg.fields.routingKey}`  );
 
 
                 }catch(e){

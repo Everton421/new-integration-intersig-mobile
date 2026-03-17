@@ -1,5 +1,6 @@
 export interface cad_clie {
- 
+ id?:number,
+ id_mobile:number,
 CODIGO:number, 
 COD_SITE:any,
 FIS_JUR:string,

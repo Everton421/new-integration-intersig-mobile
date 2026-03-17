@@ -1,7 +1,9 @@
-import { ResultSetHeader } from "mysql2"
-import dbConn, { VENDAS } from "../connection/database-connection.ts"
+import { type ResultSetHeader } from "mysql2"
+import dbConn, { MOBILE, PUBLICO, VENDAS } from "../connection/database-connection.ts"
 import { DateService } from "../utils/date.ts"
-import { deleteParcelasPedido, deleteProdutosPedido, deleteServicosPedido, insertParcelas, insertProdutosPedido, insertServicos, IParcelasPedidoSistema, IProdutoPedidoSistema, IServicosPedidoSistema } from "./repository-itens-pedido.ts"
+import { deleteParcelasPedido, deleteProdutosPedido, deleteServicosPedido, insertParcelas, insertProdutosPedido, insertServicos, type IParcelasPedidoSistema, type IProdutoPedidoSistema,type IServicosPedidoSistema } from "./repository-itens-pedido.ts"
+import { type cad_orca } from "../contracts/cad_orca.ts"
+import { type  cad_clie } from "../contracts/cad_clie.ts"
 
 
 
@@ -55,12 +57,13 @@ export interface IPedidoSistema
     just_ipi:string
     just_icms:string
     just_subst:string
+    frete:number
     produtos:  IProdutoPedidoSistema[]
     servicos: IServicosPedidoSistema[]
     parcelas:  IParcelasPedidoSistema[]  
   }
 
- 
+
      export async function insertPedido(orcamento:IPedidoSistema  ):Promise<number> {
 
         const dateService = new DateService();
@@ -86,6 +89,7 @@ export interface IPedidoSistema
             just_icms,
             just_subst,
              id,
+             frete
         } = orcamento;
            const codigoCliente = cliente.codigo;
            const codigo_site =id;
@@ -124,9 +128,9 @@ export interface IPedidoSistema
         if (!quantidade_parcelas)   quantidade_parcelas = 0
        
         const sql  =`INSERT INTO ${VENDAS}.cad_orca   
-             (cliente, cod_site, cod_externo,id_interna, veiculo, total_produtos,total_servicos, forma_pagamento, tipo,  tipo_os, DESC_PROD, TOTAL_GERAL, DATA_CADASTRO, SITUACAO,VENDEDOR,CONTATO , DATA_INICIO,DATA_PEDIDO, DATA_APROV, QTDE_PARCELAS, OBSERVACOES,OBSERVACOES2, USUARIO, DATA_RECAD)  
-                VALUES ( ? ,?, ?, ?, ?, ?, ?, ?, ?, ?, ? , ? , ? ,?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
-                    const values = [codigoCliente,  codigo_site, 0, 0 , id_veiculo, total_produtos, total_servicos ,forma_pagamento, tipo, id_tipo_os, descontos, total_geral, data_cadastro, situacao, vendedor, contato, data_cadastro, data_cadastro, data_cadastro, quantidade_parcelas, observacoes, observacoes2, vendedor, data_recadastro]; 
+             (cliente, cod_site, cod_externo,id_interna, veiculo, total_produtos,total_servicos, forma_pagamento, tipo,  tipo_os, DESC_PROD, TOTAL_GERAL, DATA_CADASTRO, SITUACAO,VENDEDOR,CONTATO , DATA_INICIO,DATA_PEDIDO, DATA_APROV, QTDE_PARCELAS, OBSERVACOES,OBSERVACOES2, USUARIO, DATA_RECAD, FRETE)  
+                VALUES ( ? ,?, ?, ?, ?, ?, ?, ?, ?, ?, ? , ? , ? ,?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+                    const values = [codigoCliente,  codigo_site, 0, 0 , id_veiculo, total_produtos, total_servicos ,forma_pagamento, tipo, id_tipo_os, descontos, total_geral, data_cadastro, situacao, vendedor, contato, data_cadastro, data_cadastro, data_cadastro, quantidade_parcelas, observacoes, observacoes2, vendedor, data_recadastro, frete]; 
         const [resultInsert ]    = await dbConn.query( sql, values) ; 
          const   result = resultInsert as ResultSetHeader;
 
@@ -164,7 +168,8 @@ export interface IPedidoSistema
                     observacoes     = '${orcamento.observacoes}',
                     data_cadastro   = '${orcamento.data_cadastro}',
                     data_recad      = '${orcamento.data_recadastro}',
-                    situacao        = '${orcamento.situacao}'
+                    situacao        = '${orcamento.situacao}',
+                    frete           = '${orcamento.frete}'
                     where codigo = ${codigoPedido}
                 `;
 
@@ -191,3 +196,30 @@ export interface IPedidoSistema
 
 
   }
+
+        export async function selectPedidoSistema( codigo_pedido:number ){
+
+                    const sql =  ` SELECT 
+                    *,
+                    DATE_FORMAT(DATA_CADASTRO, '%Y-%m-%d') AS DATA_CADASTRO,
+                    DATE_FORMAT(DATA_RECAD, '%Y-%m-%d %H:%i:%s') AS DATA_RECAD,
+                     CAST(OBSERVACOES AS CHAR(10000) CHARACTER SET latin1 ) as OBSERVACOES,
+                     CAST(OBSERVACOES2 AS CHAR(10000) CHARACTER SET latin1 ) as OBSERVACOES2
+
+                     from ${VENDAS}.cad_orca where codigo = ?  `;
+                            const values =[codigo_pedido ]
+                             const [ rows ] =  await dbConn.query( sql, values );
+                return rows as cad_orca[];
+                  
+    }
+
+  export async function selectClientePedido( codigo_cliente:number ){
+
+                    const sql =  ` SELECT c.*, ce.id_mobile from ${PUBLICO}.cad_clie as c
+                            JOIN ${MOBILE}.clientes_enviados ce on ce.codigo_sistema = c.CODIGO  
+                    where c.codigo = ?  `;
+                            const values =[codigo_cliente ]
+                             const [ rows ] =  await dbConn.query( sql, values );
+                return rows as cad_clie[];
+                  
+    }

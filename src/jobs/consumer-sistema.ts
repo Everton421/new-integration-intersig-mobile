@@ -3,6 +3,7 @@ import { type event } from "../contracts/event.ts";
 import { serviceSendBrands } from "../services/service-send-brands.ts";
 import { serviceSendCategory } from "../services/service-send-category.ts";
 import { serviceSendClient } from "../services/service-send-client.ts";
+import { serviceSendOrder } from "../services/service-send-orders.ts";
 import { serviceSendProdSetor } from "../services/service-send-prod-setor.ts";
 import { serviceSendProduct } from "../services/service-send-product.ts";
 import { serviceSendServices } from "../services/service-send-services.ts";
@@ -53,7 +54,6 @@ export  async function consumer_sistema(): Promise<  any >{
                     //    await handler(conteudo.data as exchange_message|| conteudo);
                         const data = conteudo as event;
                             if(data.tabela_origem  === 'cad_prod'){
-                                console.log(`Atualizando    ${data.id_registro}...`)    
                                   await serviceSendProduct(data);
                               }
                               if(data.tabela_origem === 'cad_serv'){
@@ -78,7 +78,9 @@ export  async function consumer_sistema(): Promise<  any >{
                               if(data.tabela_origem === 'cad_pmar' ){
                                 await serviceSendBrands(data);
                               }
-
+                              if(data.tabela_origem === 'cad_orca'){
+                                await serviceSendOrder(data)
+                              }
                             pubChannel.ack(msg);
                    }else{
                     console.log("Origin: ", conteudo.metadata )

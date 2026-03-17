@@ -1,5 +1,7 @@
-import { ResultSetHeader } from "mysql2"
-import dbConn, { VENDAS } from "../connection/database-connection.ts"
+import { type ResultSetHeader } from "mysql2"
+import dbConn, { MOBILE, VENDAS } from "../connection/database-connection.ts"
+import { type pro_orca } from "../contracts/pro_orca.ts"
+import { type par_orca } from "../contracts/par_orca.ts"
 
    export interface IServicosPedidoSistema
    {
@@ -14,20 +16,22 @@ import dbConn, { VENDAS } from "../connection/database-connection.ts"
      }
    export type IProdutoPedidoSistema
    = {
-       pedido: number
+       orcamento: number
        desconto: number
        quantidade: number
        preco: number 
        total: number
-       id: number
+       id?: number
        codigo: number
-   
+        frete:number
        just_icms:string
        just_ipi:string
        just_subst:string
        fator_val:number
        fator_qtde:number
        tabela:number
+       qtde_separada:number
+       qtde_faturada:number
      }
     
     export interface IParcelasPedidoSistema
@@ -36,7 +40,9 @@ import dbConn, { VENDAS } from "../connection/database-connection.ts"
        parcela:number
        valor:number
        vencimento:string
-   
+        dt_pagamento: string
+        id:number
+        tipo_receb:number
    }
    
    export async function insertParcelas(parcelas:IParcelasPedidoSistema[], codigo_pedido:number  ){
@@ -75,6 +81,7 @@ import dbConn, { VENDAS } from "../connection/database-connection.ts"
                     fator_val,
                     fator_qtde,
                     tabela,
+                    frete,
                 } = p
 
                  if( !preco) preco = 0;
@@ -88,7 +95,7 @@ import dbConn, { VENDAS } from "../connection/database-connection.ts"
                  if ( !fator_qtde ) fator_qtde = 1;
                  if ( !tabela ) tabela = 1; 
 			 
-             const sql =  `INSERT INTO ${VENDAS}.pro_orca (orcamento, sequencia, produto, fator_val, fator_qtde, unitario, quantidade, preco_tabela, desconto, tabela,  just_ipi, just_icms, just_subst, total_liq, unit_orig)
+             const sql =  `INSERT INTO ${VENDAS}.pro_orca (orcamento, sequencia, produto, fator_val, fator_qtde, unitario, quantidade, preco_tabela, desconto, tabela,  just_ipi, just_icms, just_subst, total_liq, unit_orig, frete)
                 VALUES ( 
                     '${codigoPedido}',
                     '${i}',
@@ -104,7 +111,8 @@ import dbConn, { VENDAS } from "../connection/database-connection.ts"
                     '${just_icms}',  
                     '${just_subst}',  
                     '${total}',  
-                    '${preco}'  
+                    '${preco}',
+                    '${frete}'  
                 ) `;
 
 			  await dbConn.query( sql)
@@ -147,6 +155,32 @@ export async function deleteProdutosPedido(codigoPedido:number){
     }
 
 
+     export async function selectProdutoDoPedido( codigo_pedido:number ){
+
+                    const sql =  ` SELECT 
+                    p.*,
+                    pe.id_mobile as id 
+                     from ${VENDAS}.pro_orca p
+                     join ${MOBILE}.produtos_enviados pe on pe.codigo_sistema = p.PRODUTO
+                      where p.orcamento = ?  `;
+                            const values =[codigo_pedido ]
+                             const [ rows ] =  await dbConn.query( sql, values );
+                return rows as pro_orca[];
+                  
+    }
+   export async function selectParcelasDoPedido( codigo_pedido:number ){
+
+                    const sql =  ` SELECT 
+                     *,
+                    DATE_FORMAT(VENCIMENTO, '%Y-%m-%d') AS  VENCIMENTO
+                     from ${VENDAS}.par_orca
+                      where  orcamento = ?  `;
+                            const values =[codigo_pedido ]
+                             const [ rows ] =  await dbConn.query( sql, values );
+                return rows as par_orca[];
+                  
+    }
+   
     export async function deleteServicosPedido(codigoPedido:number){
     const sql = `DELETE FROM ${VENDAS}.ser_orca WHERE ORCAMENTO = ${codigoPedido}`
      const [ rows ] = await dbConn.query(sql);
