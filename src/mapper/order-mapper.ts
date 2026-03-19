@@ -58,7 +58,7 @@ export async function orderMapper(codigo_sistema:number) {
                         const obj =  {       codigo :  codigo_sistema ,
                                              id :  codigo_sistema ,
                                              id_externo :   erp_order.COD_SITE   ,
-                                             id_interno :   erp_order.COD_SITE ,
+                                             id_interno :   erp_order.ID_INTERNA ,
                                              codigo_cliente :  arrClient[0].id_mobile  ,
                                              vendedor :  erp_order.VENDEDOR ,
                                              situacao :   erp_order.SITUACAO ,

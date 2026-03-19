@@ -1,6 +1,6 @@
 import { isQuestionOrExclamationToken } from "typescript";
 import dbConn, { MOBILE } from "../connection/database-connection.ts";
-import { pedidosRecebidos } from "../contracts/pedidos-recebidos.ts";
+import { type pedidosRecebidos } from "../contracts/pedidos-recebidos.ts";
 import { insertPedido, updatePedido } from "../repository/repository-pedido.ts";
 import { api } from "../services/api.ts";
 
@@ -31,7 +31,7 @@ async function insertNewOrder(order:any){
 }
 
 
-async function updateOrder(order:any){
+export async function updateOrder(order:any){
     if(order.codigo){
             const [rows] =  await dbConn.query(`SELECT * FROM ${MOBILE}.pedidos WHERE id_mobile = ${order.codigo} `);
                     const verify = rows as pedidosRecebidos[];
@@ -40,8 +40,11 @@ async function updateOrder(order:any){
 
                  if(result.data && result.data.length > 0 ){
                      await updatePedido(result.data[0], verify[0].codigo_sistema )    
+                 }else{
+                          console.log(`[x] A api não retornou o pedido ${order.codigo}  .`)
                  }
-
+               }else{
+                console.log(`[x] não foi encontrado pedido ${order.codigo} na tabela de pedidos enviados.`)
                }
     }
 

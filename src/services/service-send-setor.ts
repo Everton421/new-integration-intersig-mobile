@@ -37,6 +37,7 @@ export async function serviceSendSetor(event:event) {
                                                         const setor = arrSetor as setores[]
                                                 const data = { 
                                                         codigo: verifySetor[0].id_mobile,
+                                                        id:setor[0].CODIGO,
                                                         descricao: setor[0].NOME,
                                                         data_cadastro: dateService.formatarData( setor[0].DATA_CADASTRO )
                                                         }
@@ -55,6 +56,7 @@ export async function serviceSendSetor(event:event) {
                                                    const [ arrSetor] = await dbConn.query(`SELECT * FROM ${ESTOQUE}.setores WHERE CODIGO = ${event.id_registro};`)
                                                         const setor = arrSetor as setores[]
                                                 const data = { 
+                                                        id:setor[0].CODIGO,
                                                         descricao: setor[0].NOME,
                                                         data_cadastro: dateService.formatarData(setor[0].DATA_CADASTRO)
                                                         }

@@ -1,4 +1,5 @@
-import dbConn, { MOBILE, VENDAS } from "../connection/database-connection.ts"
+import dbConn, { ESTOQUE, MOBILE, VENDAS } from "../connection/database-connection.ts"
+import { type message_movimento_produtos } from "../contracts/message-movimentos-produtos.ts"
 import { DateService } from "../utils/date.ts"
 
 type movimentos= {
@@ -29,9 +30,31 @@ type movimentos= {
       USUARIO:number
       SETOR:number
    }
-       export async function insertMvto_produtos(mvto:messagemMvtos ) {
-        
-         const [ verifyMvtos ] = await dbConn.query(`SELECT * FROM ${MOBILE}.movimentos where id_mobile = ${mvto.id}`)    
+       export async function insertMvto_produtos(mvto:message_movimento_produtos ) {
+
+         const    sqlProdSetor = `INSERT INTO ${ESTOQUE}.prod_setor  SET 
+                        SETOR = ?,
+                        PRODUTO = ?,
+                        ESTOQUE = ?,
+                        LOCAL1_PRODUTO = ?,
+                        LOCAL2_PRODUTO = ?,
+                        LOCAL3_PRODUTO = ?,
+                        DATA_RECAD = ?,
+                        LOCAL_PRODUTO = ?,
+                        LOCAL4_PRODUTO = ? 
+                           ON DUPLICATE KEY UPDATE 
+                         ESTOQUE = ?,
+                        LOCAL1_PRODUTO = ?,
+                        LOCAL2_PRODUTO = ?,
+                        LOCAL3_PRODUTO = ?,
+                        DATA_RECAD = ?,
+                        LOCAL_PRODUTO = ?,
+                        LOCAL4_PRODUTO = ?; 
+                     `
+                     const values = 
+            const [ resultInsertProdSetor ] = await dbConn.query()
+         
+            const [ verifyMvtos ] = await dbConn.query(`SELECT * FROM ${MOBILE}.movimentos_produtos where id_mobile = ${mvto.id}`)    
          const resultVerifyMvtos = verifyMvtos as movimentos[]
          const dateService = new DateService();
             
@@ -126,7 +149,7 @@ type movimentos= {
                      );`;
                    await dbConn.query(sqlInsertlog);
                   
-                     await dbConn.query(`INSERT INTO ${MOBILE}.movimentos SET id_mobile =${mvto.id}, codigo_sistema = ${codigoAcerto};`)
+                     await dbConn.query(`INSERT INTO ${MOBILE}.movimentos_produtos SET id_mobile =${mvto.id}, codigo_sistema = ${codigoAcerto};`)
             }
              
     }

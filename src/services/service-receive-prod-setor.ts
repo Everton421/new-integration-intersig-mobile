@@ -1,8 +1,18 @@
-import { consumer } from "../jobs/consumer-sistema.ts";
-import { updateProdSetor } from "../repository/repository-prod-setor.ts";
+import {type message_movimento_produtos } from "../contracts/message-movimentos-produtos.ts";
+import { consumerMobile } from "../jobs/consumer-mobile.ts";
+import { insertMvto_produtos } from "../repository/repository-movimentos.ts";
 
 
 export async function serviceReceiveProdSetor(){
-        await consumer('produtosetor.atualizado', updateProdSetor );
+
+     
+        await consumerMobile('movimentosprodutos.inserido',  teste, true  );
+
+           async function teste( data:message_movimento_produtos ){
+                 console.log(data);
+
+         await insertMvto_produtos( data)
+        }
+
 }
  

@@ -30,8 +30,8 @@ import { type par_orca } from "../contracts/par_orca.ts"
        fator_val:number
        fator_qtde:number
        tabela:number
-       qtde_separada:number
-       qtde_faturada:number
+       quantidade_separada:number
+       quantidade_faturada:number
      }
     
     export interface IParcelasPedidoSistema
@@ -57,9 +57,7 @@ import { type par_orca } from "../contracts/par_orca.ts"
 
   export async function deleteParcelasPedido(codigoPedido:number){
     const sql = `DELETE FROM ${VENDAS}.par_orca WHERE ORCAMENTO = ${codigoPedido}`;
-    console.log(sql)
      const [ rows ] = await dbConn.query(sql);
-        console.log(rows);    
      return rows as ResultSetHeader;
 }
 
@@ -82,6 +80,8 @@ import { type par_orca } from "../contracts/par_orca.ts"
                     fator_qtde,
                     tabela,
                     frete,
+                    quantidade_separada,
+                    quantidade_faturada,
                 } = p
 
                  if( !preco) preco = 0;
@@ -95,12 +95,14 @@ import { type par_orca } from "../contracts/par_orca.ts"
                  if ( !fator_qtde ) fator_qtde = 1;
                  if ( !tabela ) tabela = 1; 
 			 
-             const sql =  `INSERT INTO ${VENDAS}.pro_orca (orcamento, sequencia, produto, fator_val, fator_qtde, unitario, quantidade, preco_tabela, desconto, tabela,  just_ipi, just_icms, just_subst, total_liq, unit_orig, frete)
+             const sql =  `INSERT INTO ${VENDAS}.pro_orca (orcamento, sequencia, produto, fator_val, qtde_separada, qtde_faturada, fator_qtde, unitario, quantidade, preco_tabela, desconto, tabela,  just_ipi, just_icms, just_subst, total_liq, unit_orig, frete)
                 VALUES ( 
                     '${codigoPedido}',
                     '${i}',
                     '${id}',
                     '${fator_val}',
+                    '${quantidade_separada}',
+                    '${quantidade_faturada}',
                     '${fator_qtde}',
                     '${preco}',
                     '${quantidade}',
@@ -128,11 +130,11 @@ import { type par_orca } from "../contracts/par_orca.ts"
 
     }
 
-export async function deleteProdutosPedido(codigoPedido:number){
-    const sql = `DELETE FROM ${VENDAS}.pro_orca WHERE ORCAMENTO = ${codigoPedido}`
-     const [ rows ] = await dbConn.query(sql);
-     return rows as ResultSetHeader;
-}
+    export async function deleteProdutosPedido(codigoPedido:number){
+        const sql = `DELETE FROM ${VENDAS}.pro_orca WHERE ORCAMENTO = ${codigoPedido}`
+        const [ rows ] = await dbConn.query(sql);
+        return rows as ResultSetHeader;
+    }
 
    export async function insertServicos( servicos:IServicosPedidoSistema[], codigo_pedido:number ){
             if (servicos.length > 0) {

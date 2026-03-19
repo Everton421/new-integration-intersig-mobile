@@ -3,8 +3,14 @@ import dbConn, { MOBILE } from '../connection/database-connection.ts';
 import { type  table_enviados } from '../contracts/table-enviados.ts';
 import { api } from '../services/api.ts';
 import { type IPedidoSistema, updatePedido } from '../repository/repository-pedido.ts';
+import { updateOrder } from '../services/service-receive-order.ts';
 
-export async function consumerMobile(domain:string) {
+/**
+ * 
+ * @param domain dominio a ser consultado. Ex: pedido.atualizado, produto.atualizado
+ * @param exec função que recebera a mensagem e fará o processamento
+ */
+export async function consumerMobile(domain:string, exec: any , ack:boolean) {
     
 try{
 
@@ -14,17 +20,18 @@ try{
     
         const channel = await conn.createChannel();
 
-         const BASE_QUEUE_NAME  =process.env.QUEUE_NAME_MOBILE
-        const CNPJ = process.env.CNPJ;
-        const EXCHANGE_NAME = process.env.EXCHANGE_NAME_MOBILE
+         const BASE_QUEUE_NAME_MOBILE  =process.env.QUEUE_NAME_MOBILE
+         const CNPJ = process.env.CNPJ;
+         const EXCHANGE_NAME = process.env.EXCHANGE_NAME_MOBILE
          const origin = process.env.API_ORIGIN_NAME || 'erp_integration';
- 
-          if( !BASE_QUEUE_NAME || !CNPJ || !EXCHANGE_NAME){
+
+         const origin_api = process.env.API_ORIGIN_RECEIVED
+          if( !BASE_QUEUE_NAME_MOBILE || !CNPJ || !EXCHANGE_NAME){
             throw new Error("Verificar variaveis de ambiente [ BASE_QUEUE_NAME, CNPJ,  EXCHANGE_NAME] "); 
           }
 
           // substitui [ . ] por [ _ ]
-          const uniqueQueueName = `${BASE_QUEUE_NAME}_${domain.replace(/\./g, '_')}`;
+          const uniqueQueueName = `${BASE_QUEUE_NAME_MOBILE}_${domain.replace(/\./g, '_')}`;
 
           await channel.assertExchange( EXCHANGE_NAME , 'topic', { durable:true })
           // 2. cria uma fila unica para este worker
@@ -36,38 +43,27 @@ try{
 
        console.log(`[*] Worker iniciado na fila [${uniqueQueueName} ] ouvindo  ${routingKey}`);
        
-        // channel.prefetch(1);
+          channel.prefetch(1);
 
       await channel.consume( q.queue, async ( msg )=>{
             if( msg ){
               try{
-  
-                let conteudo = JSON.parse(msg.content.toString());
-                if(conteudo.metadata.origin != origin ){
-                
-                    const codigoMobile = conteudo.data.codigo  
-                    const [arrVerifyOrder] = await dbConn.query(`SELECT * FROM ${MOBILE}.pedidos WHERE id_mobile = ${codigoMobile}`);
-                    const verifyOrder = arrVerifyOrder as table_enviados[];
-                    
-                    const resultApiOrder = await api.get(`/pedido?codigo=${codigoMobile}`);
-                          if(resultApiOrder.data.length >  0){
-                               const order = resultApiOrder.data[0] as IPedidoSistema ; 
-                                  await updatePedido(order,verifyOrder[0].codigo_sistema );
+                console.log(`[*] Mensagem recebida...  `);
+               let conteudo = JSON.parse(msg.content.toString());
 
-                          }else{
 
-                      console.log(`[X] não foi encontrado pedido codigo ${codigoMobile} na consulta da api.`)
-                          }  
+                 if(conteudo.metadata.origin != origin ){
+                 
+                    console.log(`[v] Mensagem recebida  em [${uniqueQueueName}]  | Key: ${msg.fields.routingKey} | origin : ${conteudo.metadata.origin}`  );
+                        
 
-                    if(verifyOrder.length > 0 ){
-
-                       
-                    }else{
-                      console.log(`[X] não foi encontrado pedido codigo ${codigoMobile} na tabela de pedidos.`)
-                    }
-                }
-                console.log(`[v] Recebido em [${uniqueQueueName}]  | Key: ${msg.fields.routingKey}`  );
-
+                      await exec(conteudo.data);
+                      if(ack){
+                        channel.ack(msg)
+                        }
+                     }else{
+                       console.log(`[X] A mensagem não será processado, pois possui a origem ${conteudo.metadata.origin} `)
+                     }
 
                 }catch(e){
                   console.log("[x] Erro ao processar a mensagem: ",e )

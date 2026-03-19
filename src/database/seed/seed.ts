@@ -14,16 +14,7 @@ export async function seed( ) {
             continue;
         }
     }
-  //  for( const i of sqlTriggers){
-  //      try{
-//
-  //      const [rows ] = await dbConn.query(i)
-  //      console.log(rows);
-  //      }catch(e){
-  //          console.log(e)
-  //          continue;
-  //      }
-  //  }
+ 
     
 }
 
