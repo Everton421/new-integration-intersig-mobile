@@ -51,8 +51,14 @@ type movimentos= {
                         LOCAL_PRODUTO = ?,
                         LOCAL4_PRODUTO = ?; 
                      `
-                     const values = 
-            const [ resultInsertProdSetor ] = await dbConn.query()
+                     const values =
+                      [ 
+                        mvto.id_setor,
+                        mvto.id_produto,
+                        mvto.quantidade,
+                        mvto.
+                      ]
+            const [ resultInsertProdSetor ] = await dbConn.query(sqlProdSetor)
          
             const [ verifyMvtos ] = await dbConn.query(`SELECT * FROM ${MOBILE}.movimentos_produtos where id_mobile = ${mvto.id}`)    
          const resultVerifyMvtos = verifyMvtos as movimentos[]
@@ -60,7 +66,7 @@ type movimentos= {
             
          
          if( resultVerifyMvtos && resultVerifyMvtos.length > 0 ){
-
+            console.log(`[X] O movimento ${mvto.id} já foi registrado. `)
             }else{
  
         console.log(`[SQl] Gravando mvto_produtos  produto: ${mvto.produto} `)

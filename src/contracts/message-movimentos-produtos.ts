@@ -10,4 +10,6 @@ export interface message_movimento_produtos {
   data_recadastro:string  
   usuario: number
   id:number
+  id_produto:number ,
+	 id_setor:number
 }
