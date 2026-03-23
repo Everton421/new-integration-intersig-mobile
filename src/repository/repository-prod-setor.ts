@@ -2,7 +2,14 @@ import { type ResultSetHeader } from "mysql2";
  
 import dbConn, { ESTOQUE, MOBILE, PUBLICO, VENDAS } from "../connection/database-connection.ts";
 import { type message_prod_setor } from "../contracts/message-prod-setor.ts";
+import { prod_setor } from "../contracts/prod_setor.ts";
 
+
+  export async function getAllProdSetor( ) {
+      const sql = `SELECT * FROM ${ESTOQUE}.prod_setor ;`
+    const [ rows ] = await dbConn.query(sql);
+      return rows as prod_setor[];
+    }
 
 
   export  async function updateProdSetor(message: message_prod_setor){
@@ -43,7 +50,7 @@ import { type message_prod_setor } from "../contracts/message-prod-setor.ts";
     }
 
     export async function findStock( codigo:number, setor?:number){
- let sql = `
+        let sql = `
                   SELECT  
                         est.CODIGO,
                         IF(est.estoque < 0, 0, est.estoque) AS ESTOQUE,
@@ -63,7 +70,6 @@ import { type message_prod_setor } from "../contracts/message-prod-setor.ts";
                         INNER JOIN ${PUBLICO}.cad_pgru AS G ON P.GRUPO = G.CODIGO
                         LEFT JOIN ${ESTOQUE}.setores AS S ON PS.SETOR = S.CODIGO
                         WHERE P.CODIGO = ${codigo}
-                        
                   `
 
                   if(setor){

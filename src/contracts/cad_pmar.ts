@@ -1,5 +1,5 @@
 export interface cad_pmar { 
-CODIGO:string
+CODIGO: number
 DESCRICAO:string
 DATA_CADASTRO:string
 NO_SITE:'S' | 'N'

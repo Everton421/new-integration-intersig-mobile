@@ -2,20 +2,13 @@ import dbConn, { MOBILE, PUBLICO } from "../connection/database-connection.ts";
 import { type cad_pmar } from "../contracts/cad_pmar.ts";
 import { type  event } from "../contracts/event.ts";
 import { type  table_enviados } from "../contracts/table-enviados.ts";
+import { getBrand } from "../repository/repository-brand.ts";
 import { api } from "./api.ts";
 
 export async function serviceSendBrands (event: event ){
 
                 console.log("[V] Verificando MOBILE marcas ...")
 
-                                          let sql = ` select 
-                                                pm.*,
-                                                DATE_FORMAT(pm.DATA_CADASTRO, '%Y-%m-%d') AS DATA_CADASTRO,
-                                                DATE_FORMAT(pm.DATA_RECAD, '%Y-%m-%d %H:%i:%s') AS DATA_RECAD 
-                                                from ${PUBLICO}.cad_pmar pm
-                                                WHERE
-                                                pm.CODIGO = ${event.id_registro} ;
-                                                `  
                                                 const [ resultVerifyBrands  ] = await dbConn.query(`SELECT * FROM ${MOBILE}.marcas_enviadas where codigo_sistema = ${event.id_registro};`);
                                                         
                                                 const arrVerifyBrands = resultVerifyBrands as table_enviados[]
@@ -37,15 +30,8 @@ export async function serviceSendBrands (event: event ){
        export async function postBrand(codigo:number){
                 const origin = process.env.API_ORIGIN_NAME || 'erp_integration';
 
-                                         let sql = ` select 
-                                                pm.*,
-                                                DATE_FORMAT(pm.DATA_CADASTRO, '%Y-%m-%d') AS DATA_CADASTRO,
-                                                DATE_FORMAT(pm.DATA_RECAD, '%Y-%m-%d %H:%i:%s') AS DATA_RECAD 
-                                                from ${PUBLICO}.cad_pmar pm
-                                                WHERE
-                                                pm.CODIGO = ${codigo} ;
-                                                `
-                                          const [ resultPmar ] = await dbConn.query(sql) 
+                                     
+                                          const   resultPmar   = await getBrand(codigo); 
                                                   const arrPmar = resultPmar as cad_pmar[] ;
 
                                           if(arrPmar.length > 0 ){
@@ -80,18 +66,9 @@ export async function serviceSendBrands (event: event ){
 
                                 const origin = process.env.API_ORIGIN_NAME || 'erp_integration';
 
-                                     let sql = ` select 
-                                                pm.*,
-                                                DATE_FORMAT(pm.DATA_CADASTRO, '%Y-%m-%d') AS DATA_CADASTRO,
-                                                DATE_FORMAT(pm.DATA_RECAD, '%Y-%m-%d %H:%i:%s') AS DATA_RECAD 
-                                                from ${PUBLICO}.cad_pmar pm
-                                                WHERE
-                                                pm.CODIGO = ${codigo} ;
-                                                `
+                                          const   resultPmar   = await getBrand(codigo); 
                                           
-                                    const [ resultPmar ] = await dbConn.query(sql) 
                                                                 const arrPmar = resultPmar as cad_pmar[] ;
-                                         
                                           if(arrPmar.length > 0 ){
 
                                                                 const brand = arrPmar[0]

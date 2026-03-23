@@ -1,5 +1,5 @@
 export interface cad_pgru { 
-CODIGO:string
+CODIGO:number
 NOME:string
 DATA_CADASTRO:string
 NO_SITE:'S' | 'N'

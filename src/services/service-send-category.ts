@@ -2,6 +2,7 @@ import dbConn, { MOBILE, PUBLICO } from "../connection/database-connection.ts";
 import { type cad_pgru } from "../contracts/cad_pgru.ts";
 import { type  event } from "../contracts/event.ts";
 import { type  table_enviados } from "../contracts/table-enviados.ts";
+import { getCategory } from "../repository/repositry-category.ts";
 import { api } from "./api.ts";
 
 export async function serviceSendCategory (event: event ){
@@ -30,17 +31,7 @@ export async function serviceSendCategory (event: event ){
 export async function postCategory ( codigo:number) {
                 const origin = process.env.API_ORIGIN_NAME || 'erp_integration';
         
-                                 let sql = ` select 
-                                                g.*,
-                                                DATE_FORMAT(g.DATA_CADASTRO, '%Y-%m-%d') AS DATA_CADASTRO,
-                                                DATE_FORMAT(g.DATA_RECAD, '%Y-%m-%d %H:%i:%s') AS DATA_RECAD 
-                                                from ${PUBLICO}.cad_pgru g
-                                                WHERE
-                                                g.CODIGO = ${codigo} ;
-                                                `  
-
-                 const [ result  ] = await dbConn.query(sql) 
-                                                                   const arrPgru = result as cad_pgru[] ;
+                                                           const arrPgru =  await getCategory(codigo);
                                                                    const grupo = arrPgru[0]
                                 if( arrPgru.length  > 0){
                                                             const data = {
@@ -76,16 +67,7 @@ export async function postCategory ( codigo:number) {
 
 export async function putCategory ( codigo:number, id_mobile:number ) {
                 const origin = process.env.API_ORIGIN_NAME || 'erp_integration';
-                 let sql = ` select 
-                                                g.*,
-                                                DATE_FORMAT(g.DATA_CADASTRO, '%Y-%m-%d') AS DATA_CADASTRO,
-                                                DATE_FORMAT(g.DATA_RECAD, '%Y-%m-%d %H:%i:%s') AS DATA_RECAD 
-                                                from ${PUBLICO}.cad_pgru g
-                                                WHERE
-                                                g.CODIGO = ${codigo} ;
-                                                `  
-                                        const [ result ] = await dbConn.query(sql) 
-                                                                const arrPgru = result as cad_pgru[] ;
+                             const arrPgru =  await getCategory(codigo);
                                                                    const grupo = arrPgru[0]
                                                                 const data = {
                                                                         codigo: id_mobile, 
