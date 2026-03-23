@@ -13,7 +13,25 @@ import { serviceSendSetor } from "../services/service-send-setor.ts";
 
 
 async function jobSendData(){
-
+          const dataProd = await getProduct ();
+        if(dataProd.length >  0 ){
+            for( const i of dataProd ){
+                await serviceSendProduct({
+                    criado_em: i.data_cadastro,
+                    dados_json: String(i),
+                    id:  0 ,
+                    id_evento:  0 ,
+                    id_message: '0',
+                    id_registro: i.codigo,
+                    setor: 0,
+                    status: 'PROCESSADO',
+                    tabela:  0 ,
+                    tabela_origem: 'cad_prod',
+                    tipo_evento: 'UPDATE'
+                     
+                })
+            }
+        }
         const dataProdSetor = await getAllProdSetor();
         if( dataProdSetor.length >  0 ){
 
@@ -34,25 +52,7 @@ async function jobSendData(){
             }
         } 
 
-        const dataProd = await getProduct ();
-        if(dataProd.length >  0 ){
-            for( const i of dataProd ){
-                await serviceSendProduct({
-                    criado_em: i.data_cadastro,
-                    dados_json: String(i),
-                    id:  0 ,
-                    id_evento:  0 ,
-                    id_message: '0',
-                    id_registro: i.codigo,
-                    setor: 0,
-                    status: 'PROCESSADO',
-                    tabela:  0 ,
-                    tabela_origem: 'cad_prod',
-                    tipo_evento: 'UPDATE'
-                     
-                })
-            }
-        }
+  
 
             const dataClient = await getAllClients();
             for( const i of dataClient ){
