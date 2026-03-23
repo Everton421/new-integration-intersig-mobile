@@ -38,7 +38,7 @@ type resultProductMobile = {
 type postProductMobile = resultProductMobile & {id:number } & {grupo : { codigo:number } } & { marca:{ codigo:number }}
 
 export async function serviceSendProduct(event: event) {
-        await delay(1000)
+        await delay(250)
 
                 try{
 
