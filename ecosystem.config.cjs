@@ -13,7 +13,7 @@ module.exports = {
          
           exec_mode: "fork",
           watch: false,
-          max_memory_restart: "250mb",
+          max_memory_restart: "250M",
           instances: 2,
           autorestart: true,
           restart_delay: 5000,
