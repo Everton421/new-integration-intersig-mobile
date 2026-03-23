@@ -1,4 +1,3 @@
-import { consumer } from "../jobs/consumer-sistema.ts";
 import dbConn, { MOBILE, VENDAS } from "../connection/database-connection.ts";
 import { DateService } from "../utils/date.ts";
 
@@ -130,9 +129,4 @@ type movimentos= {
                      await dbConn.query(`INSERT INTO ${MOBILE}.movimentos_produtos SET id_mobile =${mvto.id}, codigo_sistema = ${codigoAcerto};`)
             }
     }
-
-
-export async function serviceReceiveMvtoProdutos(){
-        await consumer('movimentosprodutos.inserido',insertMvto_produtos   );
-}
  

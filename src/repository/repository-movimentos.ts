@@ -32,34 +32,6 @@ type movimentos= {
    }
        export async function insertMvto_produtos(mvto:message_movimento_produtos ) {
 
-         const    sqlProdSetor = `INSERT INTO ${ESTOQUE}.prod_setor  SET 
-                        SETOR = ?,
-                        PRODUTO = ?,
-                        ESTOQUE = ?,
-                        LOCAL1_PRODUTO = ?,
-                        LOCAL2_PRODUTO = ?,
-                        LOCAL3_PRODUTO = ?,
-                        DATA_RECAD = ?,
-                        LOCAL_PRODUTO = ?,
-                        LOCAL4_PRODUTO = ? 
-                           ON DUPLICATE KEY UPDATE 
-                         ESTOQUE = ?,
-                        LOCAL1_PRODUTO = ?,
-                        LOCAL2_PRODUTO = ?,
-                        LOCAL3_PRODUTO = ?,
-                        DATA_RECAD = ?,
-                        LOCAL_PRODUTO = ?,
-                        LOCAL4_PRODUTO = ?; 
-                     `
-                     const values =
-                      [ 
-                        mvto.id_setor,
-                        mvto.id_produto,
-                        mvto.quantidade,
-                        mvto.
-                      ]
-            const [ resultInsertProdSetor ] = await dbConn.query(sqlProdSetor)
-         
             const [ verifyMvtos ] = await dbConn.query(`SELECT * FROM ${MOBILE}.movimentos_produtos where id_mobile = ${mvto.id}`)    
          const resultVerifyMvtos = verifyMvtos as movimentos[]
          const dateService = new DateService();

@@ -7,7 +7,7 @@ import { type message_prod_setor } from "../contracts/message-prod-setor.ts";
 
   export  async function updateProdSetor(message: message_prod_setor){
         const data = message as message_prod_setor;
-        console.log(`[SQl] Atualizando prod_setor produto: ${data.produto} `)
+         console.log(`[SQl] Atualizando prod_setor produto: ${data.produto} `)
 
         const sqlProd_setor = ` INSERT INTO ${ESTOQUE}.prod_setor  
                              set
@@ -18,8 +18,8 @@ import { type message_prod_setor } from "../contracts/message-prod-setor.ts";
                             DATA_RECAD = '${data.data_recadastro}',
                             LOCAL_PRODUTO = '${data.local_produto}',
                             LOCAL4_PRODUTO = '${data.local4_produto}',
-                            PRODUTO = '${data.produto}',
-                            SETOR = '${data.setor}'
+                            PRODUTO = '${data.id_produto}',
+                            SETOR = '${data.id_setor}'
                             ON DUPLICATE KEY UPDATE
                             ESTOQUE = ${data.estoque},
                             LOCAL1_PRODUTO = '${data.local1_produto}',

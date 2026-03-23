@@ -2,12 +2,8 @@ module.exports = {
   apps: [
 
     {
-        name: "integracao-intersig-mobile",
-        // O script principal agora é o executável CLI do tsx
-       // script: "node_modules/tsx/dist/cli.cjs", // Use o caminho relativo correto ou absoluto
+        name: "consumer-mobile",
        script: "node",
-       //   interpreter: "node",
-          // Os argumentos para o "script" (cli.js do tsx)
           args: [
             "--env-file", // Argumento para o tsx
             ".env",       // Valor do argumento --env-file
@@ -17,8 +13,8 @@ module.exports = {
          
           exec_mode: "fork",
           watch: false,
-          max_memory_restart: "1G",
-          instances: 1,
+          max_memory_restart: "250mb",
+          instances: 2,
           autorestart: true,
           restart_delay: 5000,
           error_file: "logs/api-backup-err.log",

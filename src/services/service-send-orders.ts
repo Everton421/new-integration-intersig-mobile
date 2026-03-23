@@ -7,14 +7,12 @@ import { api } from "./api.ts";
 
 
 export async function serviceSendOrder(event: event) {
-        const dateService = new DateService();
         const origin = process.env.API_ORIGIN_NAME || 'erp_integration';
 
         const [arrVerifyOrder] = await dbConn.query(`SELECT * FROM ${MOBILE}.pedidos WHERE codigo_sistema = ${event.id_registro};`)
         const verifyOrder = arrVerifyOrder as table_enviados[];
 
         const obj = await orderMapper(event.id_registro);
-        // console.log( JSON.stringify([obj]))
 
         if (verifyOrder.length > 0) {
                 if (obj !== undefined) {

@@ -53,34 +53,39 @@ export  async function consumer_sistema(): Promise<  any >{
                           
                     //    await handler(conteudo.data as exchange_message|| conteudo);
                         const data = conteudo as event;
-                            if(data.tabela_origem  === 'cad_prod'){
+                            
+                              switch (data.tabela_origem ) {
+                                case 'cad_prod':
                                   await serviceSendProduct(data);
-                              }
-                              if(data.tabela_origem === 'cad_serv'){
+                                  break;
+                                case 'cad_serv':
                                   await serviceSendServices(data);
-                              }
-                              if(data.tabela_origem === 'tipos_os'){
-                                await serviceSendTipoOs(data);
+                                  break;
+                                case 'tipos_os':
+                                  await serviceSendTipoOs(data);
+                                  break;
+                              case 'setores':
+                                   await serviceSendSetor(data);
+                                  break;
+                               case  'prod_setor':
+                                await serviceSendProdSetor(data);
+                                  break;
+                                 case  'cad_clie':
+                                  await serviceSendClient(data);
+                                  break;
+                                 case  'cad_pgru':
+                                    await serviceSendCategory(data);
+                                  break;
+                              case 'cad_pmar':
+                                  await serviceSendBrands(data);
+                                  break;
+                                case 'cad_orca':
+                                 await serviceSendOrder(data)
+                                break;
+                                default:
+                                pubChannel.ack(msg);
                               }
 
-                               if(data.tabela_origem === 'setores'){
-                                await serviceSendSetor(data);
-                              }
-                              if(data.tabela_origem === 'prod_setor'){
-                                await serviceSendProdSetor(data);
-                              }
-                               if(data.tabela_origem === 'cad_clie'){
-                                 await serviceSendClient(data);
-                              }
-                              if(data.tabela_origem === 'cad_pgru' ){
-                                await serviceSendCategory(data);
-                              }
-                              if(data.tabela_origem === 'cad_pmar' ){
-                                await serviceSendBrands(data);
-                              }
-                              if(data.tabela_origem === 'cad_orca'){
-                                await serviceSendOrder(data)
-                              }
                             pubChannel.ack(msg);
                    }else{
                     console.log("Origin: ", conteudo.metadata )

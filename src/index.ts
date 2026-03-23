@@ -1,8 +1,9 @@
 import { seed } from "./database/seed/seed.ts";
-import { consumerMobile } from "./jobs/consumer-mobile.ts";
-import { consumer_sistema } from "./jobs/consumer-sistema.ts";
+import { insertMvto_produtos } from "./repository/repository-movimentos.ts";
+import { updateProdSetor } from "./repository/repository-prod-setor.ts";
+import { consumerMobile } from "./services/consumer-mobile.ts";
+import { consumer_sistema } from "./services/consumer-sistema.ts";
 import { updateOrder } from "./services/service-receive-order.ts";
-import { serviceReceiveProdSetor } from "./services/service-receive-prod-setor.ts";
  
 
 await consumer_sistema();
@@ -10,4 +11,5 @@ await consumer_sistema();
 
      await consumerMobile('pedido.atualizado', updateOrder, true );
      
-     await serviceReceiveProdSetor() 
+     await consumerMobile('produtosetor.atualizado',updateProdSetor, true ) 
+     await consumerMobile('movimentosprodutos.inserido',insertMvto_produtos, true ) 

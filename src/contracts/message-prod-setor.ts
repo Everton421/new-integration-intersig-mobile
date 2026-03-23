@@ -7,5 +7,8 @@ export interface message_prod_setor {
   local1_produto: string,
   local2_produto: string,
   local3_produto: string,
-  local4_produto: string
+  local4_produto: string,
+  		 id_setor :  string ,
+		 id_produto :   string
+
 }
