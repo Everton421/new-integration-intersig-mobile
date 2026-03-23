@@ -1,7 +1,6 @@
 import dbConn, { ESTOQUE, MOBILE, PUBLICO } from "../connection/database-connection.ts";
 import { type event } from "../contracts/event.ts";
-import { type prod_setor } from "../contracts/prod_setor.ts";
-import { type table_enviados } from "../contracts/table-enviados.ts";
+ import { type table_enviados } from "../contracts/table-enviados.ts";
 import { findStock } from "../repository/repository-prod-setor.ts";
 import { delay } from "../utils/delay.ts";
 import { api } from "./api.ts";

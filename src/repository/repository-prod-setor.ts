@@ -2,7 +2,7 @@ import { type ResultSetHeader } from "mysql2";
  
 import dbConn, { ESTOQUE, MOBILE, PUBLICO, VENDAS } from "../connection/database-connection.ts";
 import { type message_prod_setor } from "../contracts/message-prod-setor.ts";
-import { prod_setor } from "../contracts/prod_setor.ts";
+import { type  prod_setor } from "../contracts/prod_setor.ts";
 
 
   export async function getAllProdSetor( ) {

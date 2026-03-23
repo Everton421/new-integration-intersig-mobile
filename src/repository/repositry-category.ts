@@ -1,5 +1,5 @@
 import dbConn, { PUBLICO } from "../connection/database-connection.ts";
-import { cad_pgru } from "../contracts/cad_pgru.ts";
+import { type  cad_pgru } from "../contracts/cad_pgru.ts";
 
 export async function  getCategory(codigo?: number) {
     

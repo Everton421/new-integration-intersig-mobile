@@ -1,5 +1,5 @@
 import dbConn, { MOBILE, PUBLICO } from "../connection/database-connection.ts";
-import { cad_clie } from "../contracts/cad_clie.ts";
+import { type  cad_clie } from "../contracts/cad_clie.ts";
 
 export async function getAllClients (codigo?:number){
 

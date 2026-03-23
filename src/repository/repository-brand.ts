@@ -1,5 +1,5 @@
 import dbConn, { PUBLICO } from "../connection/database-connection.ts";
-import { cad_pmar } from "../contracts/cad_pmar.ts";
+import { type cad_pmar } from "../contracts/cad_pmar.ts";
 
 export async function  getBrand(codigo?:number) {
 

@@ -1,5 +1,5 @@
 import dbConn, { ESTOQUE } from "../connection/database-connection.ts";
-import { setores } from "../contracts/setores.ts";
+import { type  setores } from "../contracts/setores.ts";
 
 export async function getSetores(codigo?:number){
                 const baseSQl = `SELECT * FROM ${ESTOQUE}.setores `
