@@ -46,16 +46,14 @@ export async function getProduct (  codigo?:number ) {
                                                                                     left join  ${PUBLICO}.tab_precos tp on tp.codigo = pp.tabela
                                                                                     left join  ${PUBLICO}.class_fiscal cf on cf.codigo = p.class_fiscal
                                                                                     left join  ${PUBLICO}.unid_prod und on und.produto = p.CODIGO and und.PADR_SAI = 'S' AND und.PADR_SEP= 'S' 
-                                                                            WHERE 
-                                                                            p.CODIGO = '${codigo}'
-                                                                            AND   `
+                                                                              `
 
-                                                                            let param = `tp.padrao = 'S'
+                                                                            let param = ` WHERE tp.padrao = 'S'
                                                                                 group by  p.CODIGO
                                                                                 order by p.CODIGO;`;
                                                                             if(codigo && codigo != undefined){
                                                                                 param = `
-                                                                                 p.CODIGO = '${codigo}' AND tp.padrao = 'S'
+                                                                               WHERE  p.CODIGO = '${codigo}' AND tp.padrao = 'S'
                                                                                 group by  p.CODIGO
                                                                                 order by p.CODIGO;
                                                                                 `
