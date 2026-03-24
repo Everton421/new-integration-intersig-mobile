@@ -1,5 +1,6 @@
 import { getBrand } from "../repository/repository-brand.ts";
 import { getAllClients } from "../repository/repository-client.ts";
+import { selectPedidoSistema } from "../repository/repository-pedido.ts";
 import { getAllProdSetor } from "../repository/repository-prod-setor.ts";
 import { getProduct } from "../repository/repository-produto.ts";
 import { getSetores } from "../repository/repository-setor.ts";
@@ -7,6 +8,7 @@ import { getCategory } from "../repository/repositry-category.ts";
 import { serviceSendBrands } from "../services/service-send-brands.ts";
 import { serviceSendCategory } from "../services/service-send-category.ts";
 import { serviceSendClient } from "../services/service-send-client.ts";
+import { serviceSendOrder } from "../services/service-send-orders.ts";
 import { serviceSendProdSetor } from "../services/service-send-prod-setor.ts";
 import { serviceSendProduct } from "../services/service-send-product.ts";
 import { serviceSendSetor } from "../services/service-send-setor.ts";
@@ -123,7 +125,26 @@ async function jobSendData(){
             }
         } 
 
-            console.log("[X] fim do processo.")
+            const dataOrders = await selectPedidoSistema();
+                if(dataOrders.length > 0  ){
+                    for( const i of dataOrders ){
+                      await serviceSendOrder({  
+                            criado_em: i.DATA_RECAD,
+                                dados_json: String(i),
+                                id:0,
+                                id_evento:0,
+                                id_message: '0',
+                                id_registro: i.CODIGO,
+                                setor: 0,
+                                status:'PROCESSADO',
+                                tabela: 0,
+                                tabela_origem:'cad_orca',
+                                tipo_evento:'INSERT'
+                            })
+                    }
+
+                }
+            console.log("[X] fim do processo.") 
                 return
         }
 

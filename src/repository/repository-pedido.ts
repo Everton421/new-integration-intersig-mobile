@@ -225,7 +225,7 @@ export async function updatePedido(orcamento: IPedidoSistema, codigoPedido: numb
 
 }
 
-export async function selectPedidoSistema(codigo_pedido: number) {
+export async function selectPedidoSistema(codigo_pedido?: number) {
 
   const sql = ` SELECT 
                     *,
@@ -234,9 +234,19 @@ export async function selectPedidoSistema(codigo_pedido: number) {
                      CAST(OBSERVACOES AS CHAR(10000) CHARACTER SET latin1 ) as OBSERVACOES,
                      CAST(OBSERVACOES2 AS CHAR(10000) CHARACTER SET latin1 ) as OBSERVACOES2
 
-                     from ${VENDAS}.cad_orca where codigo = ?  `;
-  const values = [codigo_pedido]
-  const [rows] = await dbConn.query(sql, values);
+                     from ${VENDAS}.cad_orca   `;
+  
+                      let whereClause = ` ;` 
+                      const values = [];
+
+              if( codigo_pedido && codigo_pedido != undefined){
+                whereClause = ` where codigo = ? ;`;
+                values.push(codigo_pedido); 
+              }
+
+      const finalSql = sql + whereClause
+
+  const [rows] = await dbConn.query(finalSql, values);
   return rows as cad_orca[];
 
 }
