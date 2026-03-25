@@ -53,6 +53,7 @@ export async function consumer_sistema(): Promise<any> {
 
           //    await handler(conteudo.data as exchange_message|| conteudo);
           const data = conteudo as event;
+              console.log(`[X] Mensagem recebida do sistema tabela origem ${data.tabela_origem}.`)
 
           switch (data.tabela_origem) {
             case 'cad_prod':
@@ -83,7 +84,7 @@ export async function consumer_sistema(): Promise<any> {
               await serviceSendOrder(data)
               break;
             default:
-              console.log("[X] Mensagem recebida do sisema, porém nenhuma ação será executada.")
+              console.log("[X] Mensagem recebida do sistema, porém nenhuma ação será executada.")
               pubChannel.ack(msg);
           }
 
