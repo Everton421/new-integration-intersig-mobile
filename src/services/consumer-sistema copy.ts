@@ -1,5 +1,4 @@
-import amqplib from 'amqplib';
-import { connectRabbitMQSistema, pubChannel } from "../broker-sistema/broker-connection.ts";
+import { brokerConnection, connectRabbitMQSistema, pubChannel } from "../broker-sistema/broker-connection.ts";
 import { type event } from "../contracts/event.ts";
 import { serviceSendBrands } from "../services/service-send-brands.ts";
 import { serviceSendCategory } from "../services/service-send-category.ts";
@@ -11,36 +10,39 @@ import { serviceSendServices } from "../services/service-send-services.ts";
 import { serviceSendSetor } from "../services/service-send-setor.ts";
 import { serviceSendTipoOs } from "../services/service-send-tipo-os.ts";
 
-
+/**
+ * 
+ * @param handler Função onde será executado o processamento da mensagem.
+ */
 export async function consumer_sistema(): Promise<any> {
 
   await connectRabbitMQSistema();
 
+  if (!pubChannel || !brokerConnection) {
+    console.warn("⚠️ [RabbitMQ] Sem conexão com o broker do sistema .");
+    return
+  }
 
-  const URL = process.env.BROKER_URL_SISTEMA;
-  const EXCHANGE = process.env.EXCHANGE_NAME_SISTEMA;
-
-  const conn = await amqplib.connect(URL!);
-  const channel = await conn.createChannel();
 
   const QUEUE_NAME = process.env.QUEUE_NAME_SISTEMA
+  const EXCHANGE_NAME = process.env.EXCHANGE_NAME_SISTEMA
 
-  if (!QUEUE_NAME || !EXCHANGE) {
+  if (!QUEUE_NAME || !EXCHANGE_NAME) {
     throw new Error("Verificar variaveis de ambiente do broker do sistema [ BASE_QUEUE_NAME,   EXCHANGE_NAME] ");
   }
 
   const uniqueQueueName = QUEUE_NAME
 
-  await channel.assertExchange(EXCHANGE, 'fanout', { durable: true })
-  const q = await channel.assertQueue(uniqueQueueName, { durable: true });
+  await pubChannel.assertExchange(EXCHANGE_NAME, 'fanout', { durable: true })
+  const q = await pubChannel.assertQueue(uniqueQueueName, { durable: true });
 
-  await channel.bindQueue(q.queue, EXCHANGE, '');
+  await pubChannel.bindQueue(q.queue, EXCHANGE_NAME, '');
 
   console.log(`[*] Worker iniciado na fila [${uniqueQueueName} ] `);
 
   // channel.prefetch(1);
 
-  await channel.consume(q.queue, async (msg) => {
+  await pubChannel.consume(q.queue, async (msg) => {
     if (msg) {
       try {
 
@@ -51,7 +53,7 @@ export async function consumer_sistema(): Promise<any> {
 
           //    await handler(conteudo.data as exchange_message|| conteudo);
           const data = conteudo as event;
-          console.log(`[X] Mensagem recebida do sistema tabela origem ${data.tabela_origem}.`)
+              console.log(`[X] Mensagem recebida do sistema tabela origem ${data.tabela_origem}.`)
 
           switch (data.tabela_origem) {
             case 'cad_prod':
