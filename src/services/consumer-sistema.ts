@@ -1,5 +1,4 @@
 import amqplib from 'amqplib';
-import { connectRabbitMQSistema, pubChannel } from "../broker-sistema/broker-connection.ts";
 import { type event } from "../contracts/event.ts";
 import { serviceSendBrands } from "../services/service-send-brands.ts";
 import { serviceSendCategory } from "../services/service-send-category.ts";
@@ -14,7 +13,6 @@ import { serviceSendTipoOs } from "../services/service-send-tipo-os.ts";
 
 export async function consumer_sistema(): Promise<any> {
 
-  await connectRabbitMQSistema();
 
 
   const URL = process.env.BROKER_URL_SISTEMA;
@@ -36,9 +34,9 @@ export async function consumer_sistema(): Promise<any> {
 
   await channel.bindQueue(q.queue, EXCHANGE, '');
 
-  console.log(`[*] Worker iniciado na fila [${uniqueQueueName} ] `);
+  console.log(`[*] Worker sistema iniciado na fila [${uniqueQueueName} ] `);
 
-  // channel.prefetch(1);
+    channel.prefetch(1);
 
   await channel.consume(q.queue, async (msg) => {
     if (msg) {
@@ -46,20 +44,17 @@ export async function consumer_sistema(): Promise<any> {
 
         let conteudo = JSON.parse(msg.content.toString());
 
-        console.log(`[v] Recebido em [${uniqueQueueName}]     `);
-        if (conteudo && pubChannel) {
+        if (conteudo  ) {
 
-          //    await handler(conteudo.data as exchange_message|| conteudo);
           const data = conteudo as event;
           console.log(`[X] Mensagem recebida do sistema tabela origem ${data.tabela_origem}.`)
-
           switch (data.tabela_origem) {
             case 'cad_prod':
-              await serviceSendProduct(data);
-              break;
+                const resultProduct =  await serviceSendProduct(data);
+               break;
             case 'cad_serv':
-              await serviceSendServices(data);
-              break;
+              const resultServices = await serviceSendServices(data);
+               break;
             case 'tipos_os':
               await serviceSendTipoOs(data);
               break;
@@ -83,11 +78,11 @@ export async function consumer_sistema(): Promise<any> {
               break;
             default:
               console.log("[X] Mensagem recebida do sistema, porém nenhuma ação será executada.")
-              pubChannel.ack(msg);
           }
+              channel.ack(msg);
 
         } else {
-          console.log("Origin: ", conteudo.metadata)
+          console.log("Menagem vazia: ", conteudo )
         }
 
       } catch (e) {

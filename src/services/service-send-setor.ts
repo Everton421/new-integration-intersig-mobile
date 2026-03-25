@@ -50,6 +50,11 @@ export async function serviceSendSetor(event:event) {
                                                                                 }
                                                                         }
                                                                 )
+                                                        if( resultPut.status === 200 ){
+                                                                return { sucess:true , message:''};
+                                                        }else{
+                                                                return { sucess: false , message:''};
+                                                        }
                                           
                                         }
                                   }else{
@@ -72,6 +77,10 @@ export async function serviceSendSetor(event:event) {
                                                  if(resultPut.status === 200 ){
                                                         const data = resultPut.data  as  result_api_post
                                                         await dbConn.query(`INSERT INTO ${MOBILE}.setores_enviados set codigo_sistema = ${event.id_registro}, id_mobile= ${data.codigo }`)
+                                                             return { sucess:true , message:''};
+                                                     }else{
+                                                                return { sucess: false , message:''};
+
                                                      }
                                              }
 

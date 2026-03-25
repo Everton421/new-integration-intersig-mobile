@@ -13,6 +13,8 @@ export async function serviceSendOrder(event: event) {
         const verifyOrder = arrVerifyOrder as table_enviados[];
 
         const obj = await orderMapper(event.id_registro);
+                  
+        let resultFunction = { sucess: false , message:''};
 
         if (verifyOrder.length > 0) {
                 if (obj !== undefined) {
@@ -27,9 +29,12 @@ export async function serviceSendOrder(event: event) {
 
                                 if (result.status === 200) {
                                         const resultId = result.data.results[0].codigo;
+                                        resultFunction.sucess = true
                                 }
                         } catch (e) {
                                 console.log(e)
+                                        resultFunction.sucess = false;
+                                        resultFunction.message = String(e);
                         }
                 }
 
@@ -52,15 +57,18 @@ export async function serviceSendOrder(event: event) {
                                         const SQL = `INSERT INTO ${MOBILE}.pedidos SET id_mobile = ? , codigo_sistema = ? ;`;
                                         const values = [resultId, event.id_registro]
                                         await dbConn.query(SQL, values)
-                                } else {
-                                }
+                                              resultFunction.sucess = true;
+                                }  
                         } catch (e) {
                                 console.log(e)
+                                        resultFunction.sucess = false;
+                                        resultFunction.message = String(e);
+                                
                         }
                 }
 
                 // enviar como novo 
         }
-
+        return resultFunction
 
 }

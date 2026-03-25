@@ -44,6 +44,11 @@ export async function serviceSendTipoOs (event: event ){
                                                                         }
                                                                 }
                                                         )
+                                                          if( resultPut.status === 200 ){
+                                                                return { sucess:true , message:''};
+                                                        }else{
+                                                                return { sucess: false , message:''};
+                                                        }
 
                                                 }else{
                                                               const [ resultTipo_os ] = await dbConn.query(sql) 
@@ -66,8 +71,12 @@ export async function serviceSendTipoOs (event: event ){
 
                                                         if(resultPost.status === 200){
                                                                       const data = resultPost.data  as  any
-                                                    await dbConn.query(`INSERT INTO ${MOBILE}.tiposos_enviadas set codigo_sistema = ${tipoOs.CODIGO}, id_mobile= ${data.codigo}`)
-                                                        }
+                                                                    await dbConn.query(`INSERT INTO ${MOBILE}.tiposos_enviadas set codigo_sistema = ${tipoOs.CODIGO}, id_mobile= ${data.codigo}`)
+                                                     
+                                                                return { sucess:true , message:''};
+                                                                 }else{
+                                                                return { sucess: false , message:''};
+                                                                 }
 
                                                 }
                                        

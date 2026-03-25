@@ -60,7 +60,11 @@ export async function serviceSendClient(event:event) {
                                                                         }
                                                                 }
                                                         )
-
+                                                                if( resultPut.status === 200 ){
+                                                                        return { sucess:true , message:''};
+                                                                }else{
+                                                                        return { sucess: false , message:''};
+                                                                }
                                                   
                                                 }else{
                                                  const [ resultClient ] = await dbConn.query(sql) 
@@ -94,7 +98,12 @@ export async function serviceSendClient(event:event) {
 
                                                         if(resultPost.status === 200){
                                                                       const data = resultPost.data  as  any
-                                                    await dbConn.query(`INSERT INTO ${MOBILE}.clientes_enviados set codigo_sistema = ${client.CODIGO}, id_mobile= ${data.codigo}`)
+                                                                    await dbConn.query(`INSERT INTO ${MOBILE}.clientes_enviados set codigo_sistema = ${client.CODIGO}, id_mobile= ${data.codigo}`)
+                                                                        return { sucess:true , message:''};
+
+                                                        }else{
+                                                                        return { sucess:false , message:''};
+
                                                         }
                                                 }
                                        

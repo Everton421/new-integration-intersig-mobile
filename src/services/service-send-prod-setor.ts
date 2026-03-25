@@ -45,14 +45,20 @@ export async function serviceSendProdSetor(event: event) {
                                                                                 }
                                                                         }
                                                                 )
+                                                            if( result.status === 200 ){
+                                                                  return { sucess:true , message:''};
+                                                                }else{
+                                                                  return { sucess: false , message:''};
+                                                             }
 
                                                 }else{
                                                         console.log(`[X] Produto ${PROD_SETOR.PRODUTO} nao foi enviado.`)
+                                                                  return { sucess: false , message: `[X] Produto ${PROD_SETOR.PRODUTO} nao foi enviado.` };
                                                 }
                        
                 }catch(e){
                         console.log("Erro : ",e)
-                }finally{
-                }
+                          return { sucess: false , message:''};
+                } 
 
 }
