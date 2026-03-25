@@ -7,7 +7,7 @@ const URL = process.env.BROKER_URL_MOBILE;
 const   EXCHANGE = process.env.EXCHANGE_NAME_MOBILE;
 
 export async function connectRabbitMQMobile(): Promise<void> {
-    if (!URL) throw new Error("BROKER_URL_MOBILE não definido.");
+    if (!URL) throw new Error("BROKER_URL_MOBILE broker mobile não definido .");
 
     try {
         console.log("🔌 [RabbitMQ MOBILE] Iniciando conexão...");

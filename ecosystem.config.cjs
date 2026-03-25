@@ -2,7 +2,7 @@ module.exports = {
   apps: [
 
     {
-        name: "consumer-mobile",
+        name: "integracao-mobile",
        script: "node",
           args: [
             "--env-file", // Argumento para o tsx
