@@ -63,6 +63,8 @@ try{
                         }
                      }else{
                        console.log(`[X] A mensagem não será processado, pois possui a origem ${conteudo.metadata.origin} `)
+                        channel.ack(msg)
+
                      }
 
                 }catch(e){
