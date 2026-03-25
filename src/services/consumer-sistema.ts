@@ -19,7 +19,7 @@ export async function consumer_sistema(): Promise<any> {
   await connectRabbitMQSistema();
 
   if (!pubChannel || !brokerConnection) {
-    console.warn("⚠️ [RabbitMQ] Sem conexão ativa.");
+    console.warn("⚠️ [RabbitMQ] Sem conexão com o broker do sistema .");
     return
   }
 
@@ -28,7 +28,7 @@ export async function consumer_sistema(): Promise<any> {
   const EXCHANGE_NAME = process.env.EXCHANGE_NAME_SISTEMA
 
   if (!QUEUE_NAME || !EXCHANGE_NAME) {
-    throw new Error("Verificar variaveis de ambiente [ BASE_QUEUE_NAME,   EXCHANGE_NAME] ");
+    throw new Error("Verificar variaveis de ambiente do broker do sistema [ BASE_QUEUE_NAME,   EXCHANGE_NAME] ");
   }
 
   const uniqueQueueName = QUEUE_NAME
@@ -83,6 +83,7 @@ export async function consumer_sistema(): Promise<any> {
               await serviceSendOrder(data)
               break;
             default:
+              console.log("[X] Mensagem recebida do sisema, porém nenhuma ação será executada.")
               pubChannel.ack(msg);
           }
 
