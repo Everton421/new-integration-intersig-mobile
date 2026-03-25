@@ -87,13 +87,12 @@ export async function consumer_sistema(): Promise<any> {
               pubChannel.ack(msg);
           }
 
-          pubChannel.ack(msg);
         } else {
           console.log("Origin: ", conteudo.metadata)
         }
 
       } catch (e) {
-        console.log("[x] Erro ao processar a mensagem: ", e)
+        console.log("[x] Erro ao processar a mensagem do broker do sistema: ", e)
       }
     }
   }, { noAck: false });
