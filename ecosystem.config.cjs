@@ -13,12 +13,12 @@ module.exports = {
          
           exec_mode: "fork",
           watch: false,
-          max_memory_restart: "500M",
-          instances: 1,
+          max_memory_restart: "250M",
+          instances: 2,
           autorestart: true,
           restart_delay: 5000,
-          error_file: "logs/api-backup-err.log",
-          out_file: "logs/api-backup-out.log",
+          error_file: "logs/error.log",
+          out_file: "logs/out.log",
           log_date_format: "YYYY-MM-DD HH:mm:ss"
         } , 
     ]

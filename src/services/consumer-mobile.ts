@@ -38,7 +38,7 @@ export async function consumerMobile(domain: string, exec: any, ack: boolean) {
 
     console.log(`[*] Worker iniciado na fila [${uniqueQueueName} ] ouvindo  ${routingKey}`);
 
-    channel.prefetch(1);
+    channel.prefetch(10);
 
     await channel.consume(q.queue, async (msg) => {
       if (msg) {

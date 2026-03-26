@@ -36,7 +36,7 @@ export async function consumer_sistema(): Promise<any> {
 
   console.log(`[*] Worker sistema iniciado na fila [${uniqueQueueName} ] `);
 
-    channel.prefetch(1);
+    channel.prefetch(10);
 
   await channel.consume(q.queue, async (msg) => {
     if (msg) {
