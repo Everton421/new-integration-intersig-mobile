@@ -10,8 +10,8 @@
     "db:seed": "tsx --env-file .env --experimental-strip-types src/database/seed/seed.ts",
     "teste:consumer": "tsx --env-file .env --watch  --experimental-strip-types src/__test__/teste-consumer-pedidos.ts",
     "teste": "tsx --env-file .env --watch  --experimental-strip-types src/__test__/index.ts",
-    "send:data": "tsx --env-file .env --experimental-strip-types src/jobs/job-send-data.ts"
-
+    "send:data": "tsx --env-file .env --experimental-strip-types src/jobs/job-send-data.ts",
+    "health": "node --env-file .env --watch --experimental-strip-types src/api-monitor/api-monitor.ts"
   },
   "keywords": [],
   "author": "",

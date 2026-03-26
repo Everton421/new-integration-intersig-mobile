@@ -38,6 +38,7 @@ type postProductMobile = resultProductMobile & { id: number } & { grupo: { codig
 
 export async function serviceSendProduct(event: event) {
         await delay(250)
+        let status = {sucess: true, message:'' , data: null };
 
         try {
 
@@ -76,6 +77,7 @@ export async function serviceSendProduct(event: event) {
                 const marcaErp = arrProduct[0].marca || 0;
                 const grupoErp = arrProduct[0].grupo || 0;
 
+
                 /// verifca se a marca já  foi enviada 
                 let id_marca_mobile = 0;
 
@@ -83,31 +85,29 @@ export async function serviceSendProduct(event: event) {
                 const arrVerifyBrand = resultVerifyBrand as table_enviados[];
 
                 if (arrVerifyBrand.length === 0) {
-                        const result = await postBrand(marcaErp)
-                        if (result && result.status === 200) id_marca_mobile = result.data.codigo
+                        const result = await postBrand(marcaErp) as any
+                        if (result && result.sucess ) id_marca_mobile = result.data && result.data.codigo  ? result.data.codigo : 0;
                 } else {
                         id_marca_mobile = arrVerifyBrand[0].id_mobile
                 }
 
                 const marca = { codigo: id_marca_mobile };
+                // ---------------------------------------------------------------------------
 
-                // verifca grupo
+              // verifca grupo
                 let id_categoria_mobile = 0;
                 const [resultVerifyCategory] = await dbConn.query(`SELECT * FROM ${MOBILE}.categorias_enviadas WHERE codigo_sistema = ${grupoErp};`);
                 const arrVerifyCategory = resultVerifyCategory as table_enviados[];
                 if (arrVerifyCategory.length === 0) {
-                        const result = await postCategory(grupoErp)
-                        if (result === undefined) {
-                                return;
-                        }
-                        if (result.status === 200) id_categoria_mobile = result.data.codigo
+                        const result = await postCategory(grupoErp)  as any
+                        if (result &&  result.sucess ) id_categoria_mobile = result.data && result.data.codigo ? result.data.codigo : 0
                 } else {
                         id_categoria_mobile = arrVerifyCategory[0].id_mobile
                 }
 
                 const grupo = { codigo: id_categoria_mobile };
 
-
+                // ---------------------------------------------------------------------------
 
                 const [resultVerifyProduct] = await dbConn.query(`SELECT * FROM ${MOBILE}.produtos_enviados WHERE codigo_sistema = ${event.id_registro};`);
                 const arrVerifyItems = resultVerifyProduct as produtos_enviados[]
@@ -116,50 +116,83 @@ export async function serviceSendProduct(event: event) {
                         // update produto 
                         console.log(` Atualizando  produto ${event.id_registro}...`,)
 
-                        let iten = { ...arrProduct[0], id: arrProduct[0].codigo, grupo: grupo, marca: marca } as postProductMobile
+                        let item = { ...arrProduct[0], id: arrProduct[0].codigo, grupo: grupo, marca: marca } as postProductMobile
 
-                        iten.codigo = arrVerifyItems[0].id_mobile;
+                        item.codigo = arrVerifyItems[0].id_mobile;
 
                         const arrStock = await findStock(arrProduct[0].codigo);
-                        iten.estoque = 0
-                        if (arrStock.length > 0) iten.estoque = arrStock[0].ESTOQUE;
+                        item.estoque = 0
+                        if (arrStock.length > 0) item.estoque = arrStock[0].ESTOQUE;
 
-                        iten.preco = Number(arrProduct[0].preco);
+                        item.preco = Number(arrProduct[0].preco);
 
+                        const result = await putProduct(item);
+                                if( result.sucess ){
+                                        status.sucess = true  
+                                }else{
+                                        status.sucess = false  
+                                }
 
-                        const resultPut = await api.put('/produto', iten);
-                        if (resultPut.status === 200) {
-                                //  const sql = `UPDATE ${MOBILE}.MOBILE_sistema SET status = 'PROCESSADO'   WHERE  id = ${event.id}  ;`
-                                //  await dbConn.query(sql);
-                                return { sucess: true, message:""};
-                        }
                 } else {
                         //post produto 
                         console.log(` Enviando   produto ${event.id_registro}...`,)
 
-                        let iten = { ...arrProduct[0], id: arrProduct[0].codigo, grupo: grupo, marca: marca } as postProductMobile
+                        let item = { ...arrProduct[0], id: arrProduct[0].codigo, grupo: grupo, marca: marca } as postProductMobile
 
                         const arrStock = await findStock(arrProduct[0].codigo);
-                        iten.estoque = 0
-                        if (arrStock.length > 0) iten.estoque = arrStock[0].ESTOQUE;
+                        item.estoque = 0
+                        if (arrStock.length > 0) item.estoque = arrStock[0].ESTOQUE;
 
-
-                        const resultPost = await api.post('/produto', iten);
-
-                        if (resultPost.status === 200) {
-                                //  const sql = `UPDATE ${MOBILE}.MOBILE_sistema SET status = 'PROCESSADO'   WHERE  id = ${event.id}  ;`
-                                //  await dbConn.query(sql);
-                                const data = resultPost.data as any
-                                await dbConn.query(`INSERT INTO ${MOBILE}.produtos_enviados set codigo_sistema = ${arrProduct[0].codigo}, id_mobile= ${data.codigo}`);
-                                return { sucess: true, message:""};
-                        }
-
+                        const result = await postProduct(item);
+                                if( result.sucess && result.data ){
+                                        const data = result.data as any
+                                        await dbConn.query(`INSERT INTO ${MOBILE}.produtos_enviados set codigo_sistema = ${arrProduct[0].codigo}, id_mobile= ${data.codigo}`);
+                                        status.sucess =true  
+                                        }else{
+                                        status.sucess = false  
+                                }
                 }
 
 
         } catch (e) {
                 console.log("Erro : ", e)
-                         return { sucess: false, message: e };
+                                        status.sucess = false  
+        }finally{
+                return status;
         } 
 
+}
+
+async function postProduct(data: postProductMobile){   
+        let status = {sucess: true, message:'' , data: null };
+        try {
+            const resultPost = await api.post('/produto', data);
+                if(resultPost.status === 200 || resultPost.status === 201  ){
+                         status.sucess = true 
+                        status.data = resultPost.data; 
+                        }               
+
+        } catch (error) {
+                         status.sucess = true 
+                        status.message = String(error)
+        }finally{
+                return status; 
+        }
+}
+
+async function putProduct( data:postProductMobile) {
+        let status = {sucess: true, message:'' };
+
+        try {
+                  const resultPost = await api.put('/produto', data);
+                if(resultPost.status === 200 || resultPost.status === 201  ){
+                         status.sucess = true 
+                }
+        } catch (error) {
+                
+        }finally{
+                return status; 
+
+        }
+        
 }

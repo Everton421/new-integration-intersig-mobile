@@ -14,6 +14,7 @@ type produtos_enviados = {
 
  
 export async function serviceSendProdSetor(event: event) {
+        let status = {sucess: true, message:'' , data: null };
 
                 try{
                         const origin = process.env.API_ORIGIN_NAME || 'erp_integration';
@@ -46,19 +47,25 @@ export async function serviceSendProdSetor(event: event) {
                                                                         }
                                                                 )
                                                             if( result.status === 200 ){
-                                                                  return { sucess:true , message:''};
+                                                                status.sucess = true;
                                                                 }else{
-                                                                  return { sucess: false , message:''};
+                                                                status.sucess = false;
                                                              }
 
                                                 }else{
                                                         console.log(`[X] Produto ${PROD_SETOR.PRODUTO} nao foi enviado.`)
-                                                                  return { sucess: false , message: `[X] Produto ${PROD_SETOR.PRODUTO} nao foi enviado.` };
-                                                }
+                                                                status.sucess = false;
+                                                          status.message =`[X] Produto ${PROD_SETOR.PRODUTO} nao foi enviado.`;
+                                                 }
                        
                 }catch(e){
                         console.log("Erro : ",e)
-                          return { sucess: false , message:''};
+                                                                status.sucess = false;
+
+                                                          status.message = String(e);
+
+                }finally{
+                        return status;
                 } 
 
 }

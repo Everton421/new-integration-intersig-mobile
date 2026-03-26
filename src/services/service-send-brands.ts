@@ -5,23 +5,24 @@ import { type  table_enviados } from "../contracts/table-enviados.ts";
 import { getBrand } from "../repository/repository-brand.ts";
 import { api } from "./api.ts";
 
+type resultApiBrand =   { id:number, data_cadastro: string ,data_recadastro: string , descricao: string  } 
 export async function serviceSendBrands (event: event ){
 
                 console.log("[V] Verificando MOBILE marcas ...")
+        let status = {sucess: false, message:'' , data: null   };
 
                                                 const [ resultVerifyBrands  ] = await dbConn.query(`SELECT * FROM ${MOBILE}.marcas_enviadas where codigo_sistema = ${event.id_registro};`);
                                                         
                                                 const arrVerifyBrands = resultVerifyBrands as table_enviados[]
                                                                const brandVerify =arrVerifyBrands[0];  
-                                let status = 0;
                                                 if(arrVerifyBrands.length > 0 ){
                                                       
                                                           const resultPut = await putBrand(event.id_registro, brandVerify.id_mobile);
-                                                             status = resultPut  !== undefined ?   resultPut.status : 400
+                                                             status = resultPut  
                                                 
                                                   }else{
                                                            const resultPost  =   await postBrand(event.id_registro);
-                                                             status = resultPost  !== undefined ?   resultPost.status : 400
+                                                             status = resultPost  
                                                 }
                                        
                                                 return status;
@@ -29,13 +30,16 @@ export async function serviceSendBrands (event: event ){
 
        export async function postBrand(codigo:number){
                 const origin = process.env.API_ORIGIN_NAME || 'erp_integration';
-
-                                     
-                                          const   resultPmar   = await getBrand(codigo); 
+        let status = {sucess: false, message:'' , data: null };
+                                  const   resultPmar   = await getBrand(codigo); 
+                                                  if(resultPmar.length === 0 ){
+                                                     console.log(`Marca codigo ${codigo} não foi encontrada `)
+                                                     status.message === `Marca codigo ${codigo} não foi encontrada ` 
+                                                                return status
+                                                  }
                                                   const arrPmar = resultPmar as cad_pmar[] ;
-
-                                          if(arrPmar.length > 0 ){
-
+                                     try {
+                                        
                                                                    const brand = arrPmar[0]
                                                                  const data = {
                                                                         id: brand.CODIGO,
@@ -51,25 +55,36 @@ export async function serviceSendBrands (event: event ){
                                                                         }
                                                                 }
                                                         )
-                                                        resultPost.data as { id:number, data_cadastro: string ,data_recadastro: string , descricao: string  } 
+                                                        resultPost.data 
                                                     await dbConn.query(`INSERT INTO ${MOBILE}.marcas_enviadas set codigo_sistema = ${codigo}, id_mobile= ${resultPost.data.codigo}`)
-                                                           return  resultPost    
+                                                     status.sucess = true
+                                                        status.data = resultPost.data;
 
-                                                }else{
-                                                        console.log(`[X] Marca : ${codigo} não foi encontrada. ` )
-                                                        return;
-                                                }
+                                         } catch (error) {
+                                                status.sucess = false
+                                                status.message = String(error)
+                                     }finally{
+                                        return  status;
+                                     }
+                                                        
+
 
                         }
 
                         export async  function putBrand(codigo:number, id_mobile:number ){
+        let status = {sucess: false, message:'' , data: null };
 
                                 const origin = process.env.API_ORIGIN_NAME || 'erp_integration';
 
                                           const   resultPmar   = await getBrand(codigo); 
-                                          
-                                                                const arrPmar = resultPmar as cad_pmar[] ;
-                                          if(arrPmar.length > 0 ){
+                                          if(resultPmar.length === 0 ){
+                                                console.log(`Marca codigo ${codigo} não foi encontrada `)
+                                                status.message === `Marca codigo ${codigo} não foi encontrada ` 
+                                                return status
+                                          }
+
+                                          try {
+                                               const arrPmar = resultPmar as cad_pmar[] ;
 
                                                                 const brand = arrPmar[0]
 
@@ -89,10 +104,15 @@ export async function serviceSendBrands (event: event ){
                                                                 }
                                                         )
                                                          resultPut.data as { id:number, data_cadastro: string ,data_recadastro: string , descricao: string  } 
-                                                           return  resultPut ;     
+                                                         status.sucess = true; 
+                                                         status.data = resultPut.data;
+                                          } catch (error) {
+                                                    status.sucess = false
+                                                 status.message = String(error)
+                                          }finally{
+                                            return  status;
 
-                                                        }else{
-                                                               console.log(`[X] Marca : ${codigo} não foi encontrada. ` )
-                                                                   return;  
-                                                        }
+                                          }
+
+                                                  
                                            }

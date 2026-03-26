@@ -8,6 +8,7 @@ import { api } from "./api.ts";
 export async function serviceSendCategory (event: event ){
 
                 console.log("[V] Verificando MOBILE categorias ...")
+                                   let status = null  
                                           
                                                 const [ resultVerifycategory  ] = await dbConn.query(`SELECT * FROM ${MOBILE}.categorias_enviadas where codigo_sistema = ${event.id_registro};`);
                                                         
@@ -18,29 +19,33 @@ export async function serviceSendCategory (event: event ){
                                                         console.log(`[V] Atualizando Categoria ${event.id_registro}...`);
 
                                                         const resultPut = await putCategory(event.id_registro,categoryVerify.id_mobile );
-                                                  
+                                                        status = resultPut
                                                 }else{
                                                         console.log(`[V] Cadastrando Categoria ${event.id_registro}...`);
 
                                                            const resultPost    = await postCategory(event.id_registro);
+                                                        status = resultPost
 
                                                         }
-}
+                                                        return status;
+        }
 
 
 export async function postCategory ( codigo:number) {
-                const origin = process.env.API_ORIGIN_NAME || 'erp_integration';
+        let status = {sucess: true, message:'' , data: null };
+
+        const origin = process.env.API_ORIGIN_NAME || 'erp_integration';
         
                                                            const arrPgru =  await getCategory(codigo);
                                                                    const grupo = arrPgru[0]
-                                if( arrPgru.length  > 0){
                                                             const data = {
                                                                         id: grupo.CODIGO,
                                                                         descricao: grupo.NOME,
                                                                         data_cadastro: grupo.DATA_CADASTRO ,
                                                                         data_recadastro: grupo.DATA_RECAD,
                                                                 }
-                                        
+                                                try {
+                                                          
                                                  const resultPost = await api.post("/categoria", data,
                                                                  {
                                                                  headers:{
@@ -48,25 +53,25 @@ export async function postCategory ( codigo:number) {
                                                                          }
                                                                  }
                                                          )
-                                                         if(resultPost.status === 200 ){
-                                                                     const insert= `INSERT INTO ${MOBILE}.categorias_enviadas set codigo_sistema = ${grupo.CODIGO}, id_mobile= ${resultPost.data.codigo};`;
-                                                                    await dbConn.query(insert);
-                                                         }
-                                                         if(resultPost.status === 400){
-                                                           console.log(`[X] Erro na requisição categoria codigo: ${codigo}`)
-                                                                 console.log("dados:",data);
-                                                         }
-                                       return resultPost;
-                                }else{
-                                        console.log(`[X] Não foi encontrada a categoria codigo: ${codigo}`)
-                                        return;
-                                }
-                                              
+                                                         if(resultPost.status === 200 || resultPost.status === 201  ){
+                                                                     
+                                                                const insert= `INSERT INTO ${MOBILE}.categorias_enviadas set codigo_sistema = ${grupo.CODIGO}, id_mobile= ${resultPost.data.codigo};`;
+                                                                           await dbConn.query(insert);
+                                                                 status.sucess = true
+                                                                        status.data = resultPost.data;
+                                                                }
+                                                         } catch (error) {
+                                                                 status.sucess = false
+                                                    }  
+
+                                                   return status;
 }
 
 
 export async function putCategory ( codigo:number, id_mobile:number ) {
                 const origin = process.env.API_ORIGIN_NAME || 'erp_integration';
+                 let status = {sucess: true, message:'' , data: null };
+
                              const arrPgru =  await getCategory(codigo);
                                                                    const grupo = arrPgru[0]
                                                                 const data = {
@@ -76,7 +81,9 @@ export async function putCategory ( codigo:number, id_mobile:number ) {
                                                                         data_cadastro: grupo.DATA_CADASTRO ,
                                                                         data_recadastro: grupo.DATA_RECAD,
                                                                 }
-                                        
+                                        try {
+                                                
+                                      
                                                 const resultPut = await api.put("/categoria", data,
                                                                 {
                                                                 headers:{
@@ -84,9 +91,14 @@ export async function putCategory ( codigo:number, id_mobile:number ) {
                                                                         }
                                                                 }
                                                         )
-                                                         if(resultPut.status === 400){
-                                                          console.log(`[X] Erro na requisição categoria codigo: ${codigo}`)
-                                                                console.log("dados:",data);
-                                                        }
-                                      return resultPut;
+
+                                                         if(resultPut.status === 200 || resultPut.status === 201 ){
+                                                                status.sucess = true 
+                                                        } 
+
+                                                          } catch (error) {
+                                                                status.sucess = false 
+                                                                
+                                        }
+                                      return status;
 }

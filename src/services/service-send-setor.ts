@@ -20,9 +20,10 @@ type result_api_post ={
 }
 export async function serviceSendSetor(event:event) {
         const dateService = new DateService();
+        let status = {sucess: true, message:'' , data: null };
+
                  try{
 
-                
 
                 const origin = process.env.API_ORIGIN_NAME || 'erp_integration';
 
@@ -50,10 +51,10 @@ export async function serviceSendSetor(event:event) {
                                                                                 }
                                                                         }
                                                                 )
-                                                        if( resultPut.status === 200 ){
-                                                                return { sucess:true , message:''};
+                                                        if( resultPut.status === 200 || resultPut.status === 201 ){
+                                                                status.sucess =  true
                                                         }else{
-                                                                return { sucess: false , message:''};
+                                                                status.sucess =  false
                                                         }
                                           
                                         }
@@ -77,17 +78,18 @@ export async function serviceSendSetor(event:event) {
                                                  if(resultPut.status === 200 ){
                                                         const data = resultPut.data  as  result_api_post
                                                         await dbConn.query(`INSERT INTO ${MOBILE}.setores_enviados set codigo_sistema = ${event.id_registro}, id_mobile= ${data.codigo }`)
-                                                             return { sucess:true , message:''};
+                                                                status.sucess =  true
                                                      }else{
-                                                                return { sucess: false , message:''};
+                                                                status.sucess =  false
 
                                                      }
                                              }
 
 
                     }catch(e){  
-                        console.log("ERRO : ", e );
-
+                          console.log("ERRO : ", e );
+                          status.sucess =  false
                     }finally{
+                        return status;
                     }
 }
