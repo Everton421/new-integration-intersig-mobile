@@ -15,7 +15,7 @@ export async function serviceSendCategory (event: event ){
                                 status = { sucess: false, message: `Evento ${event.tipo_evento} ${event.tabela_origem} ainda não foi configurado.`};
                                 console.log(`Evento ${event.tipo_evento} ${event.tabela_origem} ainda não foi configurado.`);
                                 return status;
-                        }else{
+                        } 
 
                                                 const [ resultVerifycategory  ] = await dbConn.query(`SELECT * FROM ${MOBILE}.categorias_enviadas where codigo_sistema = ${event.id_registro};`);
                                                         
@@ -35,7 +35,7 @@ export async function serviceSendCategory (event: event ){
 
                                                         }
                                                         return status;
-                        }
+                         
         }
 
 

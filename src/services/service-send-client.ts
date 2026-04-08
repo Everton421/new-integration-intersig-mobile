@@ -21,7 +21,7 @@ export async function serviceSendClient(event:event) {
                                 const status = { sucess: false, message: `Evento ${event.tipo_evento} ${event.tabela_origem} ainda não foi configurado.`};
                                 console.log(`Evento ${event.tipo_evento} ${event.tabela_origem} ainda não foi configurado.`);
                                 return status ;
-                        }else{
+                        } 
 
                 const dateService = new DateService();
 
@@ -115,7 +115,7 @@ export async function serviceSendClient(event:event) {
                                        
                                                 
                                           
-}
+ 
 
 
 }

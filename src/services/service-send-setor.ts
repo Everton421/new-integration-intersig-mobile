@@ -24,7 +24,7 @@ export async function serviceSendSetor(event:event) {
 
                  try{
                         if(event.tipo_evento === 'DELETE'){
-                                  status.sucess = false 
+                                  status.sucess = true 
                                    status.message = `Evento ${event.tipo_evento} ${event.tabela_origem} ainda não foi configurado.` ;
                                 console.log(`Evento ${event.tipo_evento} ${event.tabela_origem} ainda não foi configurado.`);
                                 return status ;

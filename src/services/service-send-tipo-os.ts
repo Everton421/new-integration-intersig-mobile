@@ -9,6 +9,13 @@ export async function serviceSendTipoOs (event: event ){
         const dataService =  new DateService();
 
                 const origin = process.env.API_ORIGIN_NAME || 'erp_integration';
+                        
+                 if(event.tipo_evento === 'DELETE'){
+                                let status;
+                                status = { sucess: true, message: `Evento ${event.tipo_evento} ${event.tabela_origem} ainda não foi configurado.`};
+                                console.log(`Evento ${event.tipo_evento} ${event.tabela_origem} ainda não foi configurado.`);
+                                return status;
+                        }
 
                 console.log("[V] Verificando MOBILE tipos de os  ...")
 

@@ -57,16 +57,16 @@ export async function serviceSendProduct(event: event) {
                                         if(resultDelete.affectedRows > 0 ){
                                                 status.sucess = true  
                                         }else{
-                                                status.sucess = false
+                                                status.sucess = true
                                                 status.message =`Ocorreu um erro ao tentar excluir o produto ${event.id_registro}`  
                                         }   
                                 
                                     } else{
-                                         status.sucess = false
+                                         status.sucess = true
                                          status.message =result.message  
                                     }        
                           }else{
-                                status.sucess = false
+                                status.sucess = true
                                 status.message =`O produto ${event.id_registro} não foi encontrado na tabela de enviados.`  
                          }
 

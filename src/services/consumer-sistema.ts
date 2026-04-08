@@ -51,6 +51,7 @@ export async function consumer_sistema(): Promise<any> {
           switch (data.tabela_origem) {
             case 'cad_prod':
                 const resultProduct =  await serviceSendProduct(data);
+                console.log(resultProduct);
                resultProduct.sucess ? channel.ack(msg)   : channel.nack(msg); 
                break;
             case 'cad_serv':
