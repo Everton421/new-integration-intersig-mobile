@@ -1,4 +1,4 @@
-import { ResultSetHeader } from "mysql2";
+import { type ResultSetHeader } from "mysql2";
 import dbConn, { MOBILE, PUBLICO } from "../connection/database-connection.ts";
 import { type event } from "../contracts/event.ts";
 import { type table_enviados } from "../contracts/table-enviados.ts";
