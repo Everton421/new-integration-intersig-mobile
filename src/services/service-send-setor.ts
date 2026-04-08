@@ -23,7 +23,12 @@ export async function serviceSendSetor(event:event) {
         let status = {sucess: true, message:'' , data: null };
 
                  try{
-
+                        if(event.tipo_evento === 'DELETE'){
+                                  status.sucess = false 
+                                   status.message = `Evento ${event.tipo_evento} ${event.tabela_origem} ainda não foi configurado.` ;
+                                console.log(`Evento ${event.tipo_evento} ${event.tabela_origem} ainda não foi configurado.`);
+                                return status ;
+                        } 
 
                 const origin = process.env.API_ORIGIN_NAME || 'erp_integration';
 

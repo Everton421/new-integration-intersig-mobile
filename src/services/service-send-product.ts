@@ -1,3 +1,4 @@
+import { ResultSetHeader } from "mysql2";
 import dbConn, { MOBILE, PUBLICO } from "../connection/database-connection.ts";
 import { type event } from "../contracts/event.ts";
 import { type table_enviados } from "../contracts/table-enviados.ts";
@@ -41,6 +42,38 @@ export async function serviceSendProduct(event: event) {
         let status = {sucess: true, message:'' , data: null };
 
         try {
+                if (event.tipo_evento === 'DELETE'){
+                        console.log(`[V] Excluindo produto ${event.id_registro}`)
+
+                             const [resultVerifyDeleteProduct] = await dbConn.query(`SELECT * FROM ${MOBILE}.produtos_enviados WHERE codigo_sistema = ${event.id_registro};`);
+                        const arrVerifyItems = resultVerifyDeleteProduct as produtos_enviados[]
+                        if (arrVerifyItems.length > 0) {
+
+                        const result = await deleteProduct(arrVerifyItems[0].id_mobile);
+                                 if( result.sucess){
+                   
+                                   const [resultStatusDelete] = await dbConn.query(`DELETE FROM ${MOBILE}.produtos_enviados WHERE codigo_sistema = ${event.id_registro};`);
+                                        const resultDelete  = resultStatusDelete as ResultSetHeader; 
+                                        if(resultDelete.affectedRows > 0 ){
+                                                status.sucess = true  
+                                        }else{
+                                                status.sucess = false
+                                                status.message =`Ocorreu um erro ao tentar excluir o produto ${event.id_registro}`  
+                                        }   
+                                
+                                    } else{
+                                         status.sucess = false
+                                         status.message =result.message  
+                                    }        
+                          }else{
+                                status.sucess = false
+                                status.message =`O produto ${event.id_registro} não foi encontrado na tabela de enviados.`  
+                         }
+
+                      
+
+                }else{
+
 
                          const sql = ` SELECT  
                                p.CODIGO codigo,  
@@ -153,10 +186,11 @@ export async function serviceSendProduct(event: event) {
                                 }
                 }
 
+                }
 
         } catch (e) {
                 console.log("Erro : ", e)
-                                        status.sucess = false  
+                      status.sucess = false  
         }finally{
                 return status;
         } 
@@ -186,6 +220,24 @@ async function putProduct( data:postProductMobile) {
         try {
                   const resultPost = await api.put('/produto', data);
                 if(resultPost.status === 200 || resultPost.status === 201  ){
+                         status.sucess = true 
+                }
+        } catch (error) {
+                
+        }finally{
+                return status; 
+
+        }
+        
+}
+
+
+async function deleteProduct( codigo:number) {
+        let status = {sucess: true, message:'' };
+
+        try {
+                  const resultPost = await api.delete(`/produto:/${codigo}` );
+                if(resultPost.status === 200  ){
                          status.sucess = true 
                 }
         } catch (error) {

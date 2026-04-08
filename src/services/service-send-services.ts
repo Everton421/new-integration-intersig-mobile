@@ -11,6 +11,12 @@ export async function serviceSendServices (event: event ){
                 const origin = process.env.API_ORIGIN_NAME || 'erp_integration';
 
                 console.log("[V] Verificando MOBILE servicos ...")
+                   if(event.tipo_evento === 'DELETE'){
+                        let status;
+                                status = { sucess: false, message: `Evento ${event.tipo_evento} ${event.tabela_origem} ainda não foi configurado.`};
+                                console.log(`Evento ${event.tipo_evento} ${event.tabela_origem} ainda não foi configurado.`);
+                                return status;
+                        }else{
 
                                           let sql = ` select 
                                                 cs.*,
@@ -88,6 +94,7 @@ export async function serviceSendServices (event: event ){
                                                          
 
                                                 }
+                        }
                                        
 
 }

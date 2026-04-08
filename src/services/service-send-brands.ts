@@ -11,6 +11,15 @@ export async function serviceSendBrands (event: event ){
                 console.log("[V] Verificando MOBILE marcas ...")
         let status = {sucess: false, message:'' , data: null   };
 
+        
+                      if(event.tipo_evento === 'DELETE'){
+                                  status.sucess = false 
+                                   status.message = `Evento ${event.tipo_evento} ${event.tabela_origem} ainda não foi configurado.` ;
+                                console.log(`Evento ${event.tipo_evento} ${event.tabela_origem} ainda não foi configurado.`);
+                                return status ;
+                        }else{
+
+
                                                 const [ resultVerifyBrands  ] = await dbConn.query(`SELECT * FROM ${MOBILE}.marcas_enviadas where codigo_sistema = ${event.id_registro};`);
                                                         
                                                 const arrVerifyBrands = resultVerifyBrands as table_enviados[]
@@ -26,6 +35,7 @@ export async function serviceSendBrands (event: event ){
                                                 }
                                        
                                                 return status;
+                }
 }
 
        export async function postBrand(codigo:number){

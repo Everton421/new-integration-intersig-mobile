@@ -7,9 +7,16 @@ import { api } from "./api.ts";
 
 export async function serviceSendCategory (event: event ){
 
+                        let status = null  
+
                 console.log("[V] Verificando MOBILE categorias ...")
-                                   let status = null  
-                                          
+
+                        if(event.tipo_evento === 'DELETE'){
+                                status = { sucess: false, message: `Evento ${event.tipo_evento} ${event.tabela_origem} ainda não foi configurado.`};
+                                console.log(`Evento ${event.tipo_evento} ${event.tabela_origem} ainda não foi configurado.`);
+                                return status;
+                        }else{
+
                                                 const [ resultVerifycategory  ] = await dbConn.query(`SELECT * FROM ${MOBILE}.categorias_enviadas where codigo_sistema = ${event.id_registro};`);
                                                         
                                                 const arrVerifycategory = resultVerifycategory as table_enviados[]
@@ -28,6 +35,7 @@ export async function serviceSendCategory (event: event ){
 
                                                         }
                                                         return status;
+                        }
         }
 
 
