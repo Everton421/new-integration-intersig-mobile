@@ -51,43 +51,53 @@ export async function consumer_sistema(): Promise<any> {
           switch (data.tabela_origem) {
             case 'cad_prod':
                 const resultProduct =  await serviceSendProduct(data);
-                console.log(resultProduct);
-               resultProduct.sucess ? channel.ack(msg)   : channel.nack(msg); 
+               //resultProduct.sucess ? channel.ack(msg)   : channel.nack(msg); 
+                channel.ack(msg);
                break;
             case 'cad_serv':
               const resultServices = await serviceSendServices(data);
-            resultServices.sucess ? channel.ack(msg)   : channel.nack(msg); 
-               break;
+               //resultServices.sucess ? channel.ack(msg)   : channel.nack(msg); 
+              channel.ack(msg);
+              break;
             case 'tipos_os':
               const resultSendTipoOs = await serviceSendTipoOs(data);
-                resultSendTipoOs.sucess ? channel.ack(msg)   : channel.nack(msg); 
-              break;
+                //resultSendTipoOs.sucess ? channel.ack(msg)   : channel.nack(msg); 
+              channel.ack(msg);
+                break;
             case 'setores':
               const resultSendSetor = await serviceSendSetor(data);
-                resultSendSetor.sucess ? channel.ack(msg)   : channel.nack(msg); 
-              break;
+                //resultSendSetor.sucess ? channel.ack(msg)   : channel.nack(msg); 
+               channel.ack(msg);
+                break;
             case 'prod_setor':
                const resultSendProdSetor = await serviceSendProdSetor(data);
-                resultSendProdSetor.sucess ? channel.ack(msg)   : channel.nack(msg); 
-               break;
+                //resultSendProdSetor.sucess ? channel.ack(msg)   : channel.nack(msg); 
+                channel.ack(msg);
+                break;
             case 'cad_clie':
               const resultClient = await serviceSendClient(data);
-                resultClient.sucess ? channel.ack(msg)   : channel.nack(msg); 
-              break;
+               // resultClient.sucess ? channel.ack(msg)   : channel.nack(msg); 
+                channel.ack(msg);
+               break;
             case 'cad_pgru':
               const resutlCategory = await serviceSendCategory(data);
-              resutlCategory.sucess  ? channel.ack(msg)   : channel.nack(msg); 
+              //resutlCategory.sucess  ? channel.ack(msg)   : channel.nack(msg); 
+                channel.ack(msg);
               break;
             case 'cad_pmar':
               const resultBrand =  await serviceSendBrands(data);
-              resultBrand.sucess ?    channel.ack(msg)  : channel.nack(msg);
+              //resultBrand.sucess ?    channel.ack(msg)  : channel.nack(msg);
+                channel.ack(msg);
               break;
             case 'cad_orca':
                const resultOrder = await serviceSendOrder(data)
-               resultOrder.sucess ?    channel.ack(msg)  : channel.nack(msg);
-              break;
+               //resultOrder.sucess ?    channel.ack(msg)  : channel.nack(msg);
+                channel.ack(msg);
+               break;
             default:
               console.log("[X] Mensagem recebida do sistema, porém nenhuma ação será executada.")
+                channel.ack(msg);
+
           }
 
         } else {
