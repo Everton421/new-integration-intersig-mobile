@@ -74,8 +74,8 @@ export async function serviceSendProduct(event: event) {
                                order by p.CODIGO;  `
                 const [result_cad_prod] = await dbConn.query(sql);
                 const arrProduct = result_cad_prod as resultProductMobile[]
-                const marcaErp = arrProduct[0].marca || 0;
-                const grupoErp = arrProduct[0].grupo || 0;
+                const marcaErp = arrProduct[0]?.marca || 0;
+                const grupoErp = arrProduct[0]?.grupo || 0;
 
 
                 /// verifca se a marca já  foi enviada 
