@@ -45,7 +45,7 @@ app.post("/webhook", async (req: Request, res) => {
 
       if (metadata.event == 'pedido.separado') {
             const data = req.body.data as MessageSeparationOrder;
-            await UpdateSalesOrderSeparation.updateErpOrder(data);
+            await UpdateSalesOrderSeparation.updateErpOrderSeparation(data);
       }
 
       if (metadata.event == 'produtosetor.atualizado') {
@@ -82,8 +82,8 @@ app.listen(port, () => {
   await consumer_sistema();
 
 
-await consumerMobile('pedido.separado', UpdateSalesOrderSeparation.updateErpOrder, true)
-await consumerMobile('pedido.atualizado', UpdateSalesOrderSeparation.updateErpOrder, true)
+await consumerMobile('pedido.separado', UpdateSalesOrderSeparation.updateErpOrderSeparation, true)
+ await consumerMobile('pedido.atualizado', UpdateSalesOrderSeparation.updateErpOrder, true)
 
 await consumerMobile('produtosetor.atualizado', ProdSetorRepository.updateProdSetor, true)
 
