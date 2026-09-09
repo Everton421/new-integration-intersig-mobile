@@ -135,10 +135,10 @@ export class SalesOrderRepository {
                 valuesUpdateCadOrca.push(novoContatoFinal)
             }
 
-          if(orcamento.usuario_separacao != undefined ){
-            conditionUpdateCadOrca.push( ' usuario = ? ');
-            valuesUpdateCadOrca.push(  orcamento.usuario_separacao);
-          }                
+     //     if(orcamento.usuario_separacao != undefined ){
+     //       conditionUpdateCadOrca.push( ' usuario = ? ');
+     //       valuesUpdateCadOrca.push(  orcamento.usuario_separacao);
+     //     }                
  
            conditionUpdateCadOrca.push( ' sit_separ = ? ');
            valuesUpdateCadOrca.push(orcamento.situacao_separacao);
