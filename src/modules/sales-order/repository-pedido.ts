@@ -68,52 +68,67 @@ export interface IPedidoSistema {
 
 export class SalesOrderRepository {
 
+
+  static switchStatusOrder(){
+
+  }
+
   static async updateSeparationOrder(orcamento: IPedidoSistema, codigoPedido: number) {
 
-
+    const STATUS_SEPARACAO_EM_SEPARACAO= process.env.STATUS_SEPARACAO_EM_SEPARACAO;
+    const STATUS_SEPARACAO_REJEITADA= process.env.STATUS_SEPARACAO_REJEITADA;
+    const STATUS_SEPARACAO_PAUSADA= process.env.STATUS_SEPARACAO_PAUSADA;
+    const STATUS_SEPARACAO_FINALIZADA= process.env.STATUS_SEPARACAO_FINALIZADA;
+    const STATUS_SEPARACAO_NAO_INICIADA= process.env.STATUS_SEPARACAO_NAO_INICIADA;
+    
     let resultFunction = { success: true, message: '' };
+
 
     try {
 
-      let statusOrder =0;
-
-          const resultStatus = await this.findStatusByUser(orcamento.usuario_separacao);
-          statusOrder = resultStatus.length > 0 ? resultStatus[0].codigo_status : 0; 
-        const separatorName = resultStatus.length > 0 ? resultStatus[0].apelido : 'DESCONHECIDO';
-
-
+          const resultStatus = await this.findUser(orcamento.usuario_separacao);
+          const separatorName = resultStatus.length > 0 ? resultStatus[0].apelido : 'DESCONHECIDO';
 
         const [currentPedido] = await dbConn.query(
-        `SELECT CONTATO FROM ${VENDAS}.cad_orca WHERE codigo = ?`, 
-        [codigoPedido]
-      );
+          `SELECT CONTATO FROM ${VENDAS}.cad_orca WHERE codigo = ?`, 
+          [codigoPedido]
+        );
 
         let contatoAtual = (currentPedido as any)[0]?.CONTATO || '';
 
-        // 2. Remove o status antigo da string (se houver), usando Regex.
-        // Isso procura por qualquer texto no formato "[SEPARACAO: ...]" e apaga.
         contatoAtual = contatoAtual.replace(/\[SEPARACAO:.*?\]/g, '').trim();
 
-        // 3. Monta a nova mensagem
         const messageSeparation = `[SEPARACAO: ${orcamento.status_separacao} POR ${separatorName}]`;
 
-        // 4. Junta o contato limpo com a nova mensagem
         const novoContatoFinal = `${contatoAtual} ${messageSeparation}`.trim();
 
-
-          // atualiza o status do pedido 
           const baseSql =  `UPDATE ${VENDAS}.cad_orca set `
 
               const conditionUpdateCadOrca =[];
               const valuesUpdateCadOrca=[];
-
-          if(  orcamento.status_separacao == 'EM ANDAMENTO' ) {
-            if(  statusOrder > 0 ){
-                conditionUpdateCadOrca.push( ' status = ? ');
-                valuesUpdateCadOrca.push(statusOrder);
-              }
-            } 
-
+            
+           if( orcamento.status_separacao ){
+                if( orcamento.status_separacao == 'CONCLUIDA' && STATUS_SEPARACAO_FINALIZADA)  {
+                        conditionUpdateCadOrca.push( ' status = ? ');
+                        valuesUpdateCadOrca.push(STATUS_SEPARACAO_FINALIZADA);
+                }  
+                if( orcamento.status_separacao == 'EM ANDAMENTO' && STATUS_SEPARACAO_EM_SEPARACAO)  {
+                        conditionUpdateCadOrca.push( ' status = ? ');
+                        valuesUpdateCadOrca.push(STATUS_SEPARACAO_EM_SEPARACAO);
+                 } 
+                if( orcamento.status_separacao == 'NAO INICIADA' && STATUS_SEPARACAO_NAO_INICIADA)  {
+                        conditionUpdateCadOrca.push( ' status = ? ');
+                        valuesUpdateCadOrca.push(STATUS_SEPARACAO_NAO_INICIADA);
+                 }
+                if( orcamento.status_separacao == 'PAUSADA' && STATUS_SEPARACAO_PAUSADA)  {
+                        conditionUpdateCadOrca.push( ' status = ? ');
+                        valuesUpdateCadOrca.push(STATUS_SEPARACAO_PAUSADA);
+                 }
+                if( orcamento.status_separacao == 'RECUSADA' && STATUS_SEPARACAO_REJEITADA)  {
+                        conditionUpdateCadOrca.push( ' status = ? ');
+                        valuesUpdateCadOrca.push(STATUS_SEPARACAO_REJEITADA);
+                 }
+                }
            
             if( orcamento.status_separacao ){
                 conditionUpdateCadOrca.push( ` CONTATO = ?  `);
@@ -224,7 +239,14 @@ export class SalesOrderRepository {
     return rows as [{codigo_status:number, apelido:string}];
   }
 
-
+    static async findUser(erpUserCode: number) {
+       const sql = ` SELECT  cv.codigo , cv.apelido
+         from  ${PUBLICO}.cad_vend cv 
+                         where cv.codigo = ?  `;
+       const values = [erpUserCode]
+        const [rows] = await dbConn.query(sql, values);
+    return rows as [{codigo:number, apelido:string}];
+  }
 
   static async findCustomerSalesOrder(codigo_cliente: number) {
 
