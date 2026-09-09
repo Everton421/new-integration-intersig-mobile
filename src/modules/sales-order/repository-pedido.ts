@@ -4,6 +4,7 @@ import { DateService } from "../../utils/date.ts"
 import { type cad_clie } from "../customer/contracts/cad_clie.ts"
 import { type cad_orca } from "./contracts/cad_orca.ts"
 import { repositoryItensSalesOrder, type IParcelasPedidoSistema, type IProdutoPedidoSistema, type IServicosPedidoSistema } from "./repository-itens-pedido.ts"
+import { ErpLogsRepository } from "../logs-erp/erp-logs-repository.ts"
 
 
 
@@ -56,7 +57,9 @@ export interface IPedidoSistema {
   just_ipi: string
   just_icms: string
   just_subst: string
-  frete: number
+  frete: number 
+  status_separacao: 'NAO INICIADA' | 'EM ANDAMENTO' | 'PAUSADA' | 'RECUSADA' | 'CONCLUIDA'
+  usuario_separacao:number
   produtos: IProdutoPedidoSistema[]
   servicos: IServicosPedidoSistema[]
   parcelas: IParcelasPedidoSistema[]
@@ -66,19 +69,72 @@ export interface IPedidoSistema {
 export class SalesOrderRepository {
 
   static async updateSeparationOrder(orcamento: IPedidoSistema, codigoPedido: number) {
+
+
     let resultFunction = { success: true, message: '' };
 
     try {
-      let sql = `
-                        UPDATE ${VENDAS}.cad_orca  
-                        set 
-                        sit_separ       = '${orcamento.situacao_separacao}' 
-                        where codigo = '${codigoPedido}'
-                    `;
 
-      const [rows] = await dbConn.query(sql);
+      let statusOrder =0;
+
+          const resultStatus = await this.findStatusByUser(orcamento.usuario_separacao);
+          statusOrder = resultStatus.length > 0 ? resultStatus[0].codigo_status : 0; 
+        const separatorName = resultStatus.length > 0 ? resultStatus[0].apelido : 'DESCONHECIDO';
+
+
+
+        const [currentPedido] = await dbConn.query(
+        `SELECT CONTATO FROM ${VENDAS}.cad_orca WHERE codigo = ?`, 
+        [codigoPedido]
+      );
+
+        let contatoAtual = (currentPedido as any)[0]?.CONTATO || '';
+
+        // 2. Remove o status antigo da string (se houver), usando Regex.
+        // Isso procura por qualquer texto no formato "[SEPARACAO: ...]" e apaga.
+        contatoAtual = contatoAtual.replace(/\[SEPARACAO:.*?\]/g, '').trim();
+
+        // 3. Monta a nova mensagem
+        const messageSeparation = `[SEPARACAO: ${orcamento.status_separacao} POR ${separatorName}]`;
+
+        // 4. Junta o contato limpo com a nova mensagem
+        const novoContatoFinal = `${contatoAtual} ${messageSeparation}`.trim();
+
+
+          // atualiza o status do pedido 
+          const baseSql =  `UPDATE ${VENDAS}.cad_orca set `
+
+              const conditionUpdateCadOrca =[];
+              const valuesUpdateCadOrca=[];
+
+          if(  orcamento.status_separacao == 'EM ANDAMENTO' ) {
+            if(  statusOrder > 0 ){
+                conditionUpdateCadOrca.push( ' status = ? ');
+                valuesUpdateCadOrca.push(statusOrder);
+              }
+            } 
+
+           
+            if( orcamento.status_separacao ){
+                conditionUpdateCadOrca.push( ` CONTATO = ?  `);
+                valuesUpdateCadOrca.push(novoContatoFinal)
+            }
+
+          if(orcamento.usuario_separacao != undefined ){
+            conditionUpdateCadOrca.push( ' usuario = ? ');
+            valuesUpdateCadOrca.push(  orcamento.usuario_separacao);
+          }                
+ 
+           conditionUpdateCadOrca.push( ' sit_separ = ? ');
+           valuesUpdateCadOrca.push(orcamento.situacao_separacao);
+
+           const whereClause = ` where codigo = '${codigoPedido}' `;
+
+           const sql = baseSql + conditionUpdateCadOrca.join(' , ') + whereClause;
+           const [rows] = await dbConn.query(sql, valuesUpdateCadOrca );
 
       const resultUpdatePdido = rows as ResultSetHeader;
+   
       if (resultUpdatePdido.affectedRows > 0) {
 
 
@@ -88,7 +144,7 @@ export class SalesOrderRepository {
             const sqlUpdateProOrca = `UPDATE ${VENDAS}.pro_orca set
                         QTDE_SEPARADA = '${product.quantidade_separada}'
                         WHERE ORCAMENTO = '${codigoPedido}' AND SEQUENCIA = '${product.sequencia}';`
-            await dbConn.query(sqlUpdateProOrca)
+            await dbConn.query(sqlUpdateProOrca);
 
             if (product.series) {
               try {
@@ -157,6 +213,19 @@ export class SalesOrderRepository {
     }
 
   }
+
+  static async findStatusByUser(erpUserCode: number) {
+    const sql = ` SELECT  s.codigo codigo_status , cv.apelido
+    from  ${PUBLICO}.cad_vend cv 
+    join ${PUBLICO}.cad_status as s on s.usuario = cv.codigo
+                        where cv.codigo = ?  `;
+    const values = [erpUserCode]
+    const [rows] = await dbConn.query(sql, values);
+    return rows as [{codigo_status:number, apelido:string}];
+  }
+
+
+
   static async findCustomerSalesOrder(codigo_cliente: number) {
 
     const sql = ` SELECT c.*, ce.id_mobile from ${PUBLICO}.cad_clie as c

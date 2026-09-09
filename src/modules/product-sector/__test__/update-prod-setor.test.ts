@@ -27,7 +27,7 @@ test("", async ( t )=>{
 
  
 
-      const resultUpdateProdSetor = await ProdSetorRepository.updateStockBySectorAndProduct(56098, 5, 1)
+      const resultUpdateProdSetor = await ProdSetorRepository.updateStockBySectorAndProduct(56098, 1, 2)
         console.log(resultUpdateProdSetor)
 
 })

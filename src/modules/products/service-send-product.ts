@@ -154,7 +154,7 @@ export async function serviceSendProduct(event: event) {
                                         status.success =true  
                                         console.log(`[V] Produto: ${arrProduct[0].codigo} enviado com successo!`)
                                         }else{
-                                        console.log(`[X] Erro ao tentar enviar Produto: ${arrProduct[0].codigo}  ${result.message} data: ${result.data} `)
+                                        console.log(`[X] Erro ao tentar enviar Produto: ${arrProduct[0].codigo}  ${JSON.stringify(result)} `)
 
                                         status.success = false  
                                 }

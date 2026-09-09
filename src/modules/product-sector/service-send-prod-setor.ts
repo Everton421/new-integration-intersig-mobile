@@ -1,18 +1,15 @@
-import dbConn, { ESTOQUE, MOBILE  } from "../../database/connection/database-connection.ts";
 import { type event } from "../../contracts/event.ts";
-import { type prod_setor } from "./contracts/prod_setor.ts";
-import { delay } from "../../utils/delay.ts";
+import dbConn, { ESTOQUE, MOBILE } from "../../database/connection/database-connection.ts";
 import { api } from "../../services/api.ts";
-import { serviceSendProduct } from "../products/service-send-product.ts";
 import { LogsRepository } from "../logs-integration/logs-repository.ts";
+import { serviceSendProduct } from "../products/service-send-product.ts";
+import { type prod_setor } from "./contracts/prod_setor.ts";
 
 type produtos_enviados = {
         id:number  
         id_mobile:number 
         codigo_sistema:number
 }
-
- 
 
  
 export async function serviceSendProdSetor(event: event) {
@@ -52,7 +49,7 @@ export async function serviceSendProdSetor(event: event) {
                                                                                 local2_produto: PROD_SETOR.LOCAL2_PRODUTO || '',
                                                                                 local3_produto: PROD_SETOR.LOCAL3_PRODUTO || '',
                                                                                 local4_produto: PROD_SETOR.LOCAL4_PRODUTO || '',
-                                                                                local_produto: PROD_SETOR.LOCAL_PRODUTO || ''
+                                                                                local_produto:   ''
                                                                         }
                                                                         console.log(` Enviando saldo produto ${PROD_SETOR.PRODUTO}...`, )
                                                           

@@ -1,5 +1,4 @@
 import { repositoryItensSalesOrder   } from "./repository-itens-pedido.ts";
-import { ServiceSyncCustomers } from "../customer/service-sync-customers.ts";
 import { DateService } from "../../utils/date.ts";
 import dbConn, { MOBILE, VENDAS } from "../../database/connection/database-connection.ts";
 import { SalesOrderRepository } from "./repository-pedido.ts";
