@@ -83,6 +83,7 @@ app.listen(port, () => {
 
 
 await consumerMobile('pedido.separado', UpdateSalesOrderSeparation.updateErpOrder, true)
+await consumerMobile('pedido.atualizado', UpdateSalesOrderSeparation.updateErpOrder, true)
 
 await consumerMobile('produtosetor.atualizado', ProdSetorRepository.updateProdSetor, true)
 
